@@ -17,7 +17,7 @@ struct HeaderView: View {
     var body: some View {
         VStack {
             HStack {
-                // Profile Circle with Gesture
+                
                 Circle()
                     .frame(width: 50, height: 50)
                     .foregroundColor(Color.blue)
@@ -34,7 +34,7 @@ struct HeaderView: View {
                 
                 Spacer()
                 
-                // Title in the center
+                
                 Text(self.title)
                     .font(.title)
                     .fontWeight(.bold)
@@ -42,12 +42,11 @@ struct HeaderView: View {
                 
                 Spacer()
                 
-                // Notification Icon on the right
+            
                 Image(systemName: "bell.fill")
                     .font(.title)
                     .foregroundColor(Color.blue)
                     .onTapGesture {
-                        // Handle notification tap action
                         print("Notification tapped!")
                     }
             }
@@ -58,7 +57,7 @@ struct HeaderView: View {
             
             Spacer() // To push the rest of the content below
         }
-        .edgesIgnoringSafeArea(.top) // To make it sticky
+        //.edgesIgnoringSafeArea(.top) // To make it sticky
     }
 }
 
