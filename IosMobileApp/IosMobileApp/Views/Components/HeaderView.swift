@@ -27,7 +27,6 @@ struct HeaderView: View {
                             .font(.title)
                     )
                     .onTapGesture {
-                        // Handle the gesture (e.g., show profile details)
                         isProfileTapped.toggle()
                         print("Profile tapped: \(isProfileTapped ? "Yes" : "No")")
                     }
@@ -51,13 +50,9 @@ struct HeaderView: View {
                     }
             }
             .padding()
-            .background(Color.white) // Optional: background color for header
-            .shadow(radius: 10) // Optional: shadow effect for better visibility
+            .shadow(radius: 10)
             .frame(maxWidth: .infinity, alignment: .top)
-            
-            Spacer() // To push the rest of the content below
         }
-        //.edgesIgnoringSafeArea(.top) // To make it sticky
     }
 }
 

@@ -1,6 +1,5 @@
 import Foundation
 
-
 class Goal: Identifiable {
     var id: UUID
     var title: String
@@ -11,14 +10,15 @@ class Goal: Identifiable {
     var isCompleted: Bool
     var progressDiary: [String]
     
-    init(id: UUID, title: String, description: String, category: String? = nil, deadline: Date? = nil, progress: Double, isCompleted: Bool, progressDiary: [String]) {
-        self.id = UUID()
+    // Proper initializer
+    init(id: UUID = UUID(), title: String, description: String? = nil, category: String? = nil, deadline: Date? = nil, progress: Double = 0.0, isCompleted: Bool = false, progressDiary: [String] = []) {
+        self.id = id
         self.title = title
         self.description = description
         self.category = category
         self.deadline = deadline
-        self.progress = 0.0
-        self.isCompleted = false
-        self.progressDiary = []
+        self.progress = progress
+        self.isCompleted = isCompleted
+        self.progressDiary = progressDiary
     }
 }
