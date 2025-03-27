@@ -47,7 +47,7 @@ struct LoginView: View {
                 .padding()
             
             Button(action: {
-                // Handle login logic here
+    
             }) {
                 Text("Login")
                     .font(.headline)
