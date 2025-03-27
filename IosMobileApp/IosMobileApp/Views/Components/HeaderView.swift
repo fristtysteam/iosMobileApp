@@ -50,11 +50,8 @@ struct HeaderView: View {
                     }
             }
             .padding()
-            .background(Color.white)
             .shadow(radius: 10)
             .frame(maxWidth: .infinity, alignment: .top)
-            
-            Spacer() 
         }
     }
 }

@@ -10,7 +10,6 @@ struct ContentView: View {
     var body: some View {
         VStack {
             HeaderView(title: "Achievr")
-        
             
             CustomPagingSlider(data: $goals) { goal in
                 VStack {
@@ -25,10 +24,11 @@ struct ContentView: View {
                 .padding()
             }
             
-            // No Spacer() needed here, content is already under the header
-            
         }
-        .padding()  // Optional padding for the whole view
+        .padding()
+        
+        
+        BottomBar(addButtonAction: {});
     }
 }
 
