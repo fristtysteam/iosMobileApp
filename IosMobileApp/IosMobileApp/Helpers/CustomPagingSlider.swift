@@ -22,10 +22,12 @@ struct CustomPagingSlider<Title: View, GoalCollection: RandomAccessCollection>: 
                     ForEach($data) { item in
                         VStack(spacing: 0) {
                             title(item)
-                                .frame(width: 300, height: 200) // You can define the size of each item
-                                .background(Color.gray.opacity(0.2)) // Example styling
+                                .frame(width: 350, height: 200)
+                                .background(Color.white)
                                 .cornerRadius(8)
-                                .shadow(radius: 5)
+                                .shadow(color: .gray.opacity(0.5), radius: 4, x: 0, y: 2)
+                                .padding(15)
+                            
                         }
                     }
                 }
