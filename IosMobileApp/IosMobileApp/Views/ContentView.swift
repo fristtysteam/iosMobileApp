@@ -8,6 +8,8 @@ struct ContentView: View {
         Goal(id: UUID(), title: "Create a Personal Portfolio", description: "Build an online portfolio to showcase projects", category: "Design", deadline: Date().addingTimeInterval(60*60*24*30), progress: 10.0, isCompleted: false, progressDiary: ["Set up a GitHub repository", "Created initial HTML structure"]),
     ]
     
+    @State var quote:  Quote?
+    
     var body: some View {
         ScrollView {
             VStack {
@@ -19,63 +21,39 @@ struct ContentView: View {
                         .bold()
                         .frame(maxWidth: .infinity, alignment: .leading)
                     CustomPagingSlider(data: $goals) { goal in
-                        VStack {
-                            Text(goal.wrappedValue.title)
-                                .font(.headline)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            Text(goal.wrappedValue.description ?? "No description")
-                                .frame(maxWidth: 350, alignment: .leading)
-                                .font(.subheadline)
-                                .lineLimit(1)
-                                .foregroundColor(.gray)
-                            
-                            
-                            HStack {
-                                CircularProgressView(progress: goal.wrappedValue.progress * 0.01)
-                                    .frame(width: 75, height: 75)
-                                
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                Spacer()
-                                
-                                
-                                
-                                VStack {
-                                    VStack {
-                                        Text("Category")
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                        
-                                        Text(goal.wrappedValue.category ?? "N/A")
-                                            .bold()
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                    }
-                                    
-                                    
-                                    VStack {
-                                        Text("Deadline")
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                        Text(goal.wrappedValue.deadline?.formatted(.dateTime.year().month().day()) ?? "N/A")
-                                            .bold()
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                    }
-                                }
-                                
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                        }
-                        .padding()
+                        GoalCardView(title: goal.wrappedValue.title, description: goal.wrappedValue.description, progress: goal.wrappedValue.progress, category: goal.wrappedValue.category, deadline: goal.wrappedValue.deadline)
                     }
+                }
+                
+                Spacer()
+                Spacer()
+                Spacer()
+                
+                
+                VStack {
+                    Text("Quote Of The Day")
+                        .font(.title)
+                        .italic()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    
+                    
+                    VStack {
+                        if let quote {
+                            Text(quote.quote)
+                                .font(.caption)
+                        }
+                        //COULD HAVE STOCK PHOTO OF MAN WITH SPEECH BUBBLE BESIDE
+                    }
+                    .task {
+                        do {
+                            let res = try await performQuotesApiCall()
+                            quote = res
+                        } catch {
+                            print("Error: \(error)")
+                            // Handle the error as needed
+                        }
+                    }
+                
                 }
                 
             }
