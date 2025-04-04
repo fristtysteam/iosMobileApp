@@ -29,39 +29,57 @@ struct ContentView: View {
                 Spacer()
                 Spacer()
                 
-                
                 VStack {
-                    Text("Quote Of The Day")
-                        .font(.title)
-                        .italic()
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    
-                    VStack {
-                        if let quote {
-                            Text(quote.quote)
-                                .font(.caption)
+                            Text("Quote Of The Day")
+                                .font(.title)
+                                .italic()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            
+                            VStack {
+                                if let quote {
+                                    HStack(alignment: .top) {
+                                        
+                                        Image(systemName: "person.circle.fill")
+                                            .resizable()
+                                            .frame(width: 40, height: 40)
+                                            .padding(.top, 10)
+                                        
+                                        
+                                        ZStack {
+                                            // Speech bubble
+                                            RoundedRectangle(cornerRadius: 15)
+                                                .fill(Color.blue)
+                                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                                .padding(.leading, 5)
+                                            
+                                            
+                                            Text(quote.quote)
+                                                .font(.subheadline)
+                                                .foregroundColor(.white)
+                                                .padding()
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                            }
+                            .task {
+                                do {
+                                    let res = try await performQuotesApiCall()
+                                    quote = res
+                                } catch {
+                                    print("Error: \(error)")
+                                    // Handle the error as needed
+                                }
+                            }
                         }
-                        //COULD HAVE STOCK PHOTO OF MAN WITH SPEECH BUBBLE BESIDE
                     }
-                    .task {
-                        do {
-                            let res = try await performQuotesApiCall()
-                            quote = res
-                        } catch {
-                            print("Error: \(error)")
-                            // Handle the error as needed
-                        }
-                    }
-                
-                }
                 
             }
             .padding()
             
         }
     }
-}
+
 
 #Preview {
     ContentView()
