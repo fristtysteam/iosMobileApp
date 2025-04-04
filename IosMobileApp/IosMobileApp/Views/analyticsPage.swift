@@ -26,148 +26,111 @@ struct AnalyticsView: View {
                 }
                 .padding()
                 .navigationTitle("Progress")
-                .background(Color.accentColor.opacity(0.05))
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Image(systemName: "chart.bar.fill")
-                            .imageScale(.large)
-                            .foregroundColor(.blue)
-                    }
-                }
             }
         }
     }
 }
+
+// MARK: - Progress Chart View
+struct ProgressChartView: View {
+    var completedGoals: [UserGoal]
     
-    // MARK: - Progress Chart View
-    struct ProgressChartView: View {
-        var completedGoals: [UserGoal]
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Progress Chart")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .padding(.top)
-                
-                ZStack {
-                    Color.white
-                        .cornerRadius(2)
-                        .shadow(radius: 1)
-                    
-                    Chart {
-                        ForEach(completedGoals, id: \.date) { goal in
-                            BarMark(
-                                x: .value("Date", goal.date),
-                                y: .value("Goals", goal.count)
-                            )
-                            .foregroundStyle(Color.accentColor)
-                        }
-                    }
-                    .frame(height: 250)
-                    .padding(10)
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Progress Chart")
+                .font(.headline)
+            
+            Chart {
+                ForEach(completedGoals, id: \.date) { goal in
+                    BarMark(
+                        x: .value("Date", goal.date),
+                        y: .value("Goals", goal.count)
+                    )
+                    .foregroundStyle(Color.blue)
                 }
             }
+            .frame(height: 250)
+            .padding(10)
         }
     }
+}
+
+// MARK: - Streak Tracker View
+struct StreakTrackerView: View {
+    var streakCount: Int
     
-    // MARK: - Streak Tracker View
-    struct StreakTrackerView: View {
-        var streakCount: Int
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Current Streak")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Current Streak")
+                .font(.headline)
+            
+            Text("You have completed goals for \(streakCount) consecutive days!")
+                .font(.subheadline)
+                .foregroundColor(.green)
+                .padding()
+                .background(Color.green.opacity(0.1))
+                .cornerRadius(5)
+        }
+        .padding(.horizontal)
+    }
+}
+
+// MARK: - Historical Data View
+struct HistoricalDataView: View {
+    var completedGoals: [UserGoal]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Historical Data")
+                .font(.headline)
+            
+            ForEach(completedGoals, id: \.date) { goal in
                 HStack {
-                    Text("You have completed goals for \(streakCount) consecutive days!")
+                    Text(goal.date)
                         .font(.subheadline)
-                        .foregroundColor(.green)
-                        .padding()
-                        .background(Color.green.opacity(0.1))
-                        .cornerRadius(3)
+                    Spacer()
+                    Text("\(goal.count) goals")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
                 }
-                .frame(maxWidth: .infinity)
+                .padding(.vertical, 5)
                 .padding(.horizontal)
                 .background(Color.white)
-                .cornerRadius(3)
-                .shadow(radius: 1)
+                .cornerRadius(5)
             }
-            .padding(.horizontal)
         }
+        .padding(.horizontal)
     }
-    
-    // MARK: - Historical Data View
-    struct HistoricalDataView: View {
-        var completedGoals: [UserGoal]
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Historical Data")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                ForEach(completedGoals, id: \.date) { goal in
-                    HStack {
-                        Text(goal.date)
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
-                        
-                        Text("\(goal.count) goals")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.vertical, 5)
-                    .padding(.horizontal)
-                    .background(Color.white)
-                    .cornerRadius(2)
-                    .shadow(radius: 1)
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-    
-    // MARK: - Insights View
-    struct InsightsView: View {
-        var insights: String
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Insights on Productivity")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                Text(insights)
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
-                    .padding(.top, 5)
-                    .padding(.horizontal)
-                    .background(Color.white)
-                    .cornerRadius(2)
-                    .shadow(radius: 1)
-            }
-            .padding(.horizontal)
-        }
-    }
-    
-    // MARK: - UserGoal Model
-    struct UserGoal {
-        var date: String
-        var count: Int
-    }
-    
-    struct AnalyticsView_Previews: PreviewProvider {
-        static var previews: some View {
-            AnalyticsView()
-        }
-    }
+}
 
-#Preview {
-    ContentView()
+// MARK: - Insights View
+struct InsightsView: View {
+    var insights: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Insights on Productivity")
+                .font(.headline)
+            
+            Text(insights)
+                .font(.subheadline)
+                .padding(10)
+                .background(Color.white)
+                .cornerRadius(5)
+                .shadow(radius: 2)
+        }
+        .padding(.horizontal)
+    }
+}
 
+// MARK: - UserGoal Model
+struct UserGoal {
+    var date: String
+    var count: Int
+}
+
+struct AnalyticsView_Previews: PreviewProvider {
+    static var previews: some View {
+        AnalyticsView()
+    }
 }
