@@ -1,0 +1,45 @@
+# Build products
+build/
+DerivedData/
+
+# Xcode workspace files
+*.xcworkspace
+!default.xcworkspace
+
+# Xcode user data
+*.xcuserstate
+*.xcuserdatad/
+*.xcuserdata/
+
+# Swift package manager
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/xcuserdata/*.xcuserdatad/
+*.xcodeproj/xcshareddata/
+
+# User-specific files
+*.swp
+*.DS_Store
+*.log
+*.tmp
+
+# Archives
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Provisioning profiles
+*.mobileprovision
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Other files
+*.hmap
+*.appiconset
+
+# macOS files
+.AppleDouble
+.LSOverride
+Icon?

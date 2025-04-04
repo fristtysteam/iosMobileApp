@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3F2951072D9FF84000E6627C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3F2951062D9FF83A00E6627C /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3F9C48732D844D0300D7A051 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3F2951062D9FF83A00E6627C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		3F9C48622D844D0200D7A051 /* IosMobileApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IosMobileApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F9C48722D844D0300D7A051 /* IosMobileAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IosMobileAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F9C487C2D844D0300D7A051 /* IosMobileAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IosMobileAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,6 +80,7 @@
 		3F9C48592D844D0200D7A051 = {
 			isa = PBXGroup;
 			children = (
+				3F2951062D9FF83A00E6627C /* .gitignore */,
 				3F9C48642D844D0200D7A051 /* IosMobileApp */,
 				3F9C48752D844D0300D7A051 /* IosMobileAppTests */,
 				3F9C487F2D844D0300D7A051 /* IosMobileAppUITests */,
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F2951072D9FF84000E6627C /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
