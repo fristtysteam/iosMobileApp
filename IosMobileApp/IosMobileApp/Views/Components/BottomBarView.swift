@@ -2,53 +2,82 @@ import SwiftUI
 
 struct BottomBar: View {
     var addButtonAction: () -> Void
-    
-    var body: some View {
-        HStack {
-            Button(action: { /* Home Action */ }) {
-                Image(systemName: "house.fill")
-                    .resizable()
-                    .frame(width: 28, height: 28)
-                    .foregroundColor(.primary)
-            }
-            .padding()
+    var homeAction: () -> Void = {}
+    var goalsAction: () -> Void = {}
+    var profileAction: () -> Void = {}
+    var settingsAction: () -> Void = {}
+    var helpAction: () -> Void = {}
+    var logoutAction: () -> Void = {}
 
-            Spacer()
+    var body: some View {
+        ZStack {
+            HStack {
+                Button(action: homeAction) {
+                    VStack {
+                        Image(systemName: "house.fill")
+                        Text("Home")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .foregroundColor(.primary)
+
+                Button(action: goalsAction) {
+                    VStack {
+                        Image(systemName: "target")
+                        Text("Goals")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .foregroundColor(.primary)
+
+                Spacer()
+                    .frame(width: 60)
+
+                Button(action: profileAction) {
+                    VStack {
+                        Image(systemName: "person.crop.circle")
+                        Text("Profile")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .foregroundColor(.primary)
+
+                Menu {
+                    Button("Settings", action: settingsAction)
+                    Button("Help", action: helpAction)
+                    Button("Logout", action: logoutAction)
+                } label: {
+                    VStack {
+                        Image(systemName: "ellipsis.circle")
+                        Text("More")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .foregroundColor(.primary)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 10)
+            .frame(height: 70)
+            .background(Color(.systemBackground).ignoresSafeArea())
+            .shadow(radius: 3)
+
 
             Button(action: addButtonAction) {
                 Image(systemName: "plus")
-                    .font(.headline)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 20)
+                    .font(.system(size: 24, weight: .bold))
+                    .frame(width: 56, height: 56)
                     .background(Color.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(100)
-                    .shadow(radius: 3)
+                    .clipShape(Circle())
+                    .shadow(radius: 4)
             }
-
-            Spacer()
-
-            Menu {
-                Button("Settings", action: {})
-                Button("Logout", action: {})
-            } label: {
-                Image(systemName: "ellipsis")
-                    .resizable()
-                    .frame(width: 28, height: 6)
-                    .foregroundColor(.primary)
-                    .padding()
-            }
+            .offset(y: -28)
         }
-        .padding(.vertical)
-        .frame(height: 70)
-        .background(Color(.white))
-        //.cornerRadius(15)
-        .shadow(radius: 5)
-        //.padding, 16)
     }
-
 }
 
 #Preview {
-    BottomBar(addButtonAction: {})
+    BottomBar(addButtonAction: {
+        print("Add tapped")
+    })
 }
