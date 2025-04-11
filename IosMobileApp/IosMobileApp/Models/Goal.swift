@@ -10,7 +10,6 @@ class Goal: Identifiable, Codable {
     var isCompleted: Bool
     var progressDiary: [String]
     
-    // Proper initializer
     init(id: UUID = UUID(), title: String, description: String? = nil, category: String? = nil, deadline: Date? = nil, progress: Double = 0.0, isCompleted: Bool = false, progressDiary: [String] = []) {
         self.id = id
         self.title = title

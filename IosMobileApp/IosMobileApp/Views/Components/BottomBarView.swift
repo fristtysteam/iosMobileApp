@@ -30,9 +30,7 @@ struct BottomBar: View {
                 .frame(maxWidth: .infinity)
                 .foregroundColor(.primary)
 
-                Spacer()
-                    .frame(width: 60)
-
+               
                 Button(action: profileAction) {
                     VStack {
                         Image(systemName: "person.crop.circle")
@@ -62,15 +60,7 @@ struct BottomBar: View {
             .shadow(radius: 3)
 
 
-            Button(action: addButtonAction) {
-                Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .bold))
-                    .frame(width: 56, height: 56)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .clipShape(Circle())
-                    .shadow(radius: 4)
-            }
+        
             .offset(y: -28)
         }
     }

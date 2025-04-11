@@ -80,4 +80,7 @@ struct GoalCardView: View {
         }
         .padding()
     }
+    
 }
+
+

@@ -54,5 +54,10 @@ struct AddGoalView: View {
 }
 
 #Preview {
+    HeaderView(title: "Achievr")
+
     AddGoalView()
+    BottomBar(addButtonAction: {
+        print("Add tapped")
+    })
 }

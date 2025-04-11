@@ -131,7 +131,12 @@ struct InsightsView: View {
 
 
 #Preview {
+    HeaderView(title: "Achievr")
+
     AnalyticsView()
+    BottomBar(addButtonAction: {
+        print("Add tapped")
+    })
 }
 
 
