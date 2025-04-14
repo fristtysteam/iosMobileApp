@@ -1,6 +1,7 @@
 import Foundation
 import GRDB
 
+
 struct Goal: Identifiable, Codable, FetchableRecord, PersistableRecord {
     var id: UUID
     var userId: UUID?

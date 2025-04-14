@@ -4,10 +4,12 @@
 //
 //  Created by Student on 14/04/2025.
 //
+import Foundation
 
 import GRDB
+import Combine
 
-class GoalRepository {
+class GoalRepository: ObservableObject {
     private let dbQueue: DatabaseQueue
     
     init(dbQueue: DatabaseQueue) {

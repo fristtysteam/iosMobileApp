@@ -4,7 +4,7 @@
 //
 //  Created by Student on 14/04/2025.
 //
-
+import Foundation
 import GRDB
 
 final class DatabaseManager {
@@ -76,7 +76,7 @@ final class DatabaseManager {
             // sample quotes
             let sampleQuotes = [
                 Quote(quote: "The journey of a thousand miles begins with one step.", author: "Lao Tzu", html: ""),
-                Quote(quote: "That which does not kill us makes us stronger.", author: "Friedrich Nietzsche", html: "")
+                Quote(quote: "That which does not kill us makes us stronger.", author: "Friedrich Nietzsche", html: ""),
                 Quote(quote: "are you the code or the coded", author: "Marco Ladeira", html: "")
             ]
             

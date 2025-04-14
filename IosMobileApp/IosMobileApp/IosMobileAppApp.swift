@@ -3,7 +3,6 @@ import SwiftUI
 @main
 struct IosMobileAppApp: App {
     private let databaseManager = DatabaseManager.shared
-    
     private let userRepository: UserRepository
     private let goalRepository: GoalRepository
     private let quoteRepository: QuoteRepository
@@ -11,7 +10,6 @@ struct IosMobileAppApp: App {
     // Initialize everything
     init() {
         let dbQueue = databaseManager.getDatabase()
-        
         userRepository = UserRepository(dbQueue: dbQueue)
         goalRepository = GoalRepository(dbQueue: dbQueue)
         quoteRepository = QuoteRepository(dbQueue: dbQueue)

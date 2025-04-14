@@ -6,8 +6,8 @@
 //
 
 import GRDB
-
-class UserRepository {
+import Foundation
+class UserRepository: ObservableObject {
     private let dbQueue: DatabaseQueue
     
     init(dbQueue: DatabaseQueue) {

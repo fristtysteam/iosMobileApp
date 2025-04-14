@@ -7,8 +7,8 @@
 
 
 import GRDB
-
-class QuoteRepository {
+import Foundation
+class QuoteRepository: ObservableObject {
     private let dbQueue: DatabaseQueue
     
     init(dbQueue: DatabaseQueue) {
