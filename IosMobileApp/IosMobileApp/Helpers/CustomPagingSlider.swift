@@ -3,8 +3,6 @@ import SwiftUI
 import SwiftUICore
  
 
-
-
 struct CustomPagingSlider<Title: View, GoalCollection: RandomAccessCollection>: View where GoalCollection: MutableCollection, GoalCollection.Element: Identifiable {
     
     var showsIndicator: ScrollIndicatorVisibility = .hidden

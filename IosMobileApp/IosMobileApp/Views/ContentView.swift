@@ -1,6 +1,5 @@
 import SwiftUI
 
-
 struct ContentView: View {
     @State private var selectedTab: TabDestination? = .home
     @State private var navigationPath = NavigationPath()
@@ -13,99 +12,31 @@ struct ContentView: View {
 
     @State private var quote: Quote?
     @State private var isLoadingQuote = false
+    
+    @State private var currentTab = 0
 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
-            ZStack(alignment: .bottom) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        HeaderView(title: "Achievr")
-
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Recent Goals")
-                                .font(.title)
-                                .bold()
-
-                            CustomPagingSlider(data: $goals) { goal in
-                                GoalCardView(title: goal.wrappedValue.title,
-                                             description: goal.wrappedValue.description,
-                                             progress: goal.wrappedValue.progress,
-                                             category: goal.wrappedValue.category,
-                                             deadline: goal.wrappedValue.deadline)
-                            }
-                        }
-
-                        VStack(alignment: .center, spacing: 10) {
-                            Text("Quote Of The Day")
-                                .font(.title)
-                                .italic()
-                                .frame(maxWidth: .infinity)
-
-                            if isLoadingQuote {
-                                ProgressView("Fetching quote...")
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                            } else if let quote = quote {
-                                HStack(alignment: .top) {
-                                    Image(systemName: "person.circle.fill")
-                                        .resizable()
-                                        .frame(width: 40, height: 40)
-                                        .padding(.top, 10)
-
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 15)
-                                            .fill(Color.blue)
-                                            .padding(.leading, 5)
-
-                                        Text(quote.quote)
-                                            .font(.subheadline)
-                                            .foregroundColor(.white)
-                                            .padding()
-                                    }
-                                }
-                            }
-                        }
-                        .task {
-                            isLoadingQuote = true
-                            do {
-                                let res = try await performQuotesApiCall()
-                                quote = res
-                            } catch {
-                                print("Error: \(error)")
-                            }
-                            isLoadingQuote = false
-                        }
+        ZStack{
+            NavigationStack(path: $navigationPath) {
+                ZStack(alignment: .bottom) {
+                   
+                    switch currentTab {
+                    case 0:
+                        HomeView(goals: $goals)
+                    case 1:
+                        GoalConnectPage()
+                    default:
+                        HomeView(goals: $goals)
                     }
-                    .padding(.bottom, 80)
-                    .padding(.horizontal)
+                    
+                    BottomBar(
+                        currentTab: $currentTab
+                    )
                 }
-
-                BottomBar(
-                    selectedTab: $selectedTab,
-                    homeAction: { },
-                    goalsAction: { navigationPath.append(TabDestination.goals) },
-                    profileAction: { navigationPath.append(TabDestination.profile) },
-                    settingsAction: { navigationPath.append(TabDestination.settings) },
-                    helpAction: { navigationPath.append(TabDestination.help) },
-                    logoutAction: { navigationPath.append(TabDestination.logout) }
-                )
+                .ignoresSafeArea(edges: .bottom)
             }
-            .ignoresSafeArea(edges: .bottom)
-            .navigationDestination(for: TabDestination.self) { destination in
-                switch destination {
-                case .home:
-                    ContentView()
-                case .goals:
-                    GoalConnectPage()
-                case .profile:
-                    ProfileSettingsView()
-                case .settings:
-                    GoalConnectPage()
-                case .help:
-                    GoalConnectPage()
-                case .logout:
-                    GoalConnectPage()
-                }
-            }
+            
+            
         }
     }
 }
