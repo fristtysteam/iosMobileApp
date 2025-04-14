@@ -1,9 +1,3 @@
-//
-//  DatabaseManager.swift
-//  IosMobileApp
-//
-//  Created by Student on 14/04/2025.
-//
 import Foundation
 import GRDB
 

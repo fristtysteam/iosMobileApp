@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3F2951562D9FFB8300E6627C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3F2951552D9FFB7C00E6627C /* .gitignore */; };
 		3F4F330B2DAD5A1800C38C5F /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F4F330A2DAD5A1800C38C5F /* GRDB */; };
-		3F4F330D2DAD5A1800C38C5F /* GRDB-dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 3F4F330C2DAD5A1800C38C5F /* GRDB-dynamic */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,7 +59,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F4F330B2DAD5A1800C38C5F /* GRDB in Frameworks */,
-				3F4F330D2DAD5A1800C38C5F /* GRDB-dynamic in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,7 +121,6 @@
 			name = IosMobileApp;
 			packageProductDependencies = (
 				3F4F330A2DAD5A1800C38C5F /* GRDB */,
-				3F4F330C2DAD5A1800C38C5F /* GRDB-dynamic */,
 			);
 			productName = IosMobileApp;
 			productReference = 3F9C48622D844D0200D7A051 /* IosMobileApp.app */;
@@ -585,11 +582,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3F4F33092DAD557A00C38C5F /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
-		};
-		3F4F330C2DAD5A1800C38C5F /* GRDB-dynamic */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3F4F33092DAD557A00C38C5F /* XCRemoteSwiftPackageReference "GRDB.swift" */;
-			productName = "GRDB-dynamic";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -88,20 +88,130 @@ struct GoalConnectPage: View {
                 }
                 .padding(.bottom, 80)
             }
-            // Navigation Destinations
-            .navigationDestination(isPresented: $showingAddGoal) {
-                AddGoalView()
-                    .navigationBarTitle("New Goal", displayMode: .inline)
-            }
-            .navigationDestination(isPresented: $showingGoalDetails) {
-                GoalDetailsView(goal: sampleGoal)
-                    .navigationBarTitle("Goal Details", displayMode: .inline)
-            }
-            .navigationDestination(isPresented: $showingAnalytics) {
-                AnalyticsView() 
-                    .navigationBarTitle("Progress Insights", displayMode: .inline)
-            }
-            .navigationBarTitleDisplayMode(.inline)
+        }
+        .navigationDestination(isPresented: $showingAddGoal) {
+            AddGoalView()
+        }
+        .navigationDestination(isPresented: $showingGoalDetails) {
+            GoalDetailsView(goal: sampleGoal)
+        }
+        .navigationDestination(isPresented: $showingAnalytics) {
+            AnalyticsView()
         }
     }
+}
+
+struct ActionCard: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            AngularGradient(
+                                colors: [color.opacity(0.3), color.opacity(0.1)],
+                                center: .center,
+                                angle: .degrees(45)
+                            )
+                        )
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(color)
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline.weight(.medium))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+                
+                Spacer()
+                
+                // Chevron indicator
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.secondary.opacity(0.7))
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color(.secondarySystemBackground))
+                    .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 3)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 18))
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+}
+
+struct InspirationCard: View {
+    let quotes = [
+        "The future depends on what you do today. - Mahatma Gandhi",
+        "Small steps every day lead to big results. - Anonymous",
+        "You don't have to be great to start, but you have to start to be great. - Zig Ziglar"
+    ]
+    
+    @State private var currentQuote: String
+    
+    init() {
+        _currentQuote = State(initialValue: quotes.randomElement() ?? quotes[0])
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(currentQuote)
+                .font(.callout)
+                .italic()
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.center)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(.tertiarySystemBackground))
+                        .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 3)
+                )
+            
+            Button(action: {
+                withAnimation(.spring()) {
+                    currentQuote = quotes.randomElement() ?? quotes[0]
+                }
+            }) {
+                Text("New Inspiration")
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(.blue)
+                    .padding(.top, 8)
+            }
+        }
+        .padding(.horizontal, 24)
+    }
+}
+
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .opacity(configuration.isPressed ? 0.9 : 1)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
+#Preview {
+    GoalConnectPage(
+        
+    )
 }
