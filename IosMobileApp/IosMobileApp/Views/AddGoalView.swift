@@ -57,7 +57,5 @@ struct AddGoalView: View {
     HeaderView(title: "Achievr")
 
     AddGoalView()
-    BottomBar(addButtonAction: {
-        print("Add tapped")
-    })
+
 }
