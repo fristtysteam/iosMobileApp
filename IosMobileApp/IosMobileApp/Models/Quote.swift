@@ -1,15 +1,8 @@
-//
-//  Quote.swift
-//  IosMobileApp
-//
-//  Created by Student on 10/04/2025.
-//
-
-
 import Foundation
+import GRDB
 
-struct Quote: Codable {
-    var quote: String 
+struct Quote: Codable, FetchableRecord, PersistableRecord {
+    var quote: String
     var author: String
     var html: String
 
@@ -17,6 +10,12 @@ struct Quote: Codable {
         case quote = "q"
         case author = "a"
         case html = "h"
+    }
+    
+    enum Columns {
+        static let quote = Column(CodingKeys.quote)
+        static let author = Column(CodingKeys.author)
+        static let html = Column(CodingKeys.html)
     }
 }
 

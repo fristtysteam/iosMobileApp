@@ -125,7 +125,7 @@ struct GoalConnectPage: View {
                     .navigationBarTitle("Goal Details", displayMode: .inline)
             }
             .navigationDestination(isPresented: $showingAnalytics) {
-                AnalyticsView() // Make sure you have AnalyticsPage defined
+                AnalyticsView() 
                     .navigationBarTitle("Progress Insights", displayMode: .inline)
             }
             .navigationBarTitleDisplayMode(.inline)
