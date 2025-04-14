@@ -1,18 +1,3 @@
-//
-//  GoalCardView.swift
-//  IosMobileApp
-//
-//  Created by Student on 10/04/2025.
-//
-
-
-//
-//  GoalCardView.swift
-//  IosMobileApp
-//
-//  Created by Student on 31/03/2025.
-//
-
 import SwiftUICore
 
 struct GoalCardView: View {
