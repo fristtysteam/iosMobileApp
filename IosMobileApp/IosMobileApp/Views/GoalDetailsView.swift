@@ -157,7 +157,4 @@ struct ProgressBar: View {
         GoalDetailsView(goal: Goal(title: "Learn Swift", description: "Complete all the Swift courses", category: "Education", deadline: Date(), progress: 60, isCompleted: false))
     }
 
-    BottomBar(addButtonAction: {
-        print("Add tapped")
-    })
 }

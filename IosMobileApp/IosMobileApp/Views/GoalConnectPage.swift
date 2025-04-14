@@ -85,10 +85,10 @@ struct GoalConnectPage: View {
 #Preview {
     HeaderView(title: "Achievr")
 
+
     NavigationStack {
         GoalConnectPage()
     }
-    BottomBar(addButtonAction: {
-        print("Add tapped")
-    })
+
+
 }
