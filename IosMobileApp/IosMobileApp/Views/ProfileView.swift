@@ -3,6 +3,8 @@ import SwiftUI
 struct ProfileSettingsView: View {
     @State private var notificationsEnabled = false
     @State private var dataSharingEnabled = false
+    @EnvironmentObject var userController: UserController
+
     
     var body: some View {
         NavigationView {
@@ -17,9 +19,9 @@ struct ProfileSettingsView: View {
                         .padding()
                     
                     VStack(alignment: .leading) {
-                        Text("User Name")
+                        Text(userController.username)
                             .font(.headline)
-                        Text("user@example.com")
+                        Text(userController.email)
                             .font(.subheadline)
                     }
                     .padding(.leading)
@@ -47,5 +49,7 @@ struct ProfileSettingsView: View {
 struct ProfileSettingsView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileSettingsView()
+            .environmentObject(UserController())
     }
 }
+
