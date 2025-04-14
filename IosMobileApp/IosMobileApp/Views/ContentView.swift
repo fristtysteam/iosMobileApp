@@ -10,78 +10,82 @@ struct ContentView: View {
     
     @State var quote:  Quote?
     
+    
     var body: some View {
-        ScrollView {
-            VStack {
-                HeaderView(title: "Achievr")
-                
+
+            ScrollView {
                 VStack {
-                    Text("Recent Goals")
-                        .font(.title)
-                        .bold()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    CustomPagingSlider(data: $goals) { goal in
-                        GoalCardView(title: goal.wrappedValue.title, description: goal.wrappedValue.description, progress: goal.wrappedValue.progress, category: goal.wrappedValue.category, deadline: goal.wrappedValue.deadline)
+                    HeaderView(title: "Achievr")
+                    
+                    VStack {
+                        Text("Recent Goals")
+                            .font(.title)
+                            .bold()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        CustomPagingSlider(data: $goals) { goal in
+                            GoalCardView(title: goal.wrappedValue.title, description: goal.wrappedValue.description, progress: goal.wrappedValue.progress, category: goal.wrappedValue.category, deadline: goal.wrappedValue.deadline)
+                        }
                     }
-                }
-                
-                Spacer()
-                Spacer()
-                Spacer()
-                
-                VStack {
-                            Text("Quote Of The Day")
-                                .font(.title)
-                                .italic()
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            
-                            VStack {
-                                if let quote {
-                                    HStack(alignment: .top) {
+                    
+                    Spacer()
+                    Spacer()
+                    Spacer()
+                    
+                    VStack {
+                        Text("Quote Of The Day")
+                            .font(.title)
+                            .italic()
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        
+                        VStack {
+                            if let quote {
+                                HStack(alignment: .top) {
+                                    
+                                    Image(systemName: "person.circle.fill")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .padding(.top, 10)
+                                    
+                                    
+                                    ZStack {
+                           
+                                        RoundedRectangle(cornerRadius: 15)
+                                            .fill(Color.blue)
+                                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                            .padding(.leading, 5)
                                         
-                                        Image(systemName: "person.circle.fill")
-                                            .resizable()
-                                            .frame(width: 40, height: 40)
-                                            .padding(.top, 10)
                                         
-                                        
-                                        ZStack {
-                                            // Speech bubble
-                                            RoundedRectangle(cornerRadius: 15)
-                                                .fill(Color.blue)
-                                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                                .padding(.leading, 5)
-                                            
-                                            
-                                            Text(quote.quote)
-                                                .font(.subheadline)
-                                                .foregroundColor(.white)
-                                                .padding()
-                                        }
-                                        .frame(maxWidth: .infinity)
+                                        Text(quote.quote)
+                                            .font(.subheadline)
+                                            .foregroundColor(.white)
+                                            .padding()
                                     }
-                                }
-                            }
-                            .task {
-                                do {
-                                    let res = try await performQuotesApiCall()
-                                    quote = res
-                                } catch {
-                                    print("Error: \(error)")
-                                    // Handle the error as needed
+                                    .frame(maxWidth: .infinity)
                                 }
                             }
                         }
+                        .task {
+                            do {
+                                let res = try await performQuotesApiCall()
+                                quote = res
+                            } catch {
+                                print("Error: \(error)")
+
+                            }
+                        }
                     }
+                }
                 
             }
             .padding()
             
-            BottomBar(addButtonAction: {})
+            
         }
-    
+        
     
     }
+        
+    
 
 
 #Preview {

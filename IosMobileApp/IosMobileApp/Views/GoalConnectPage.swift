@@ -14,5 +14,14 @@ struct GoalConnectPage: View {
 }
 
 #Preview {
+    HeaderView(title: "Achievr")
+
     GoalConnectPage()
+    BottomBar(addButtonAction: {
+        print("Add tapped")
+    })
 }
+
+
+
+

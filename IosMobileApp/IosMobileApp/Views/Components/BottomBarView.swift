@@ -16,6 +16,7 @@ struct BottomBar: View {
                     VStack {
                         Image(systemName: "house.fill")
                         Text("Home")
+
                     }
                 }
                 .frame(maxWidth: .infinity)
