@@ -1,58 +1,26 @@
 import SwiftUI
 
 struct BottomBar: View {
-    @Binding var selectedTab: TabDestination?
-
-    var homeAction: () -> Void
-    var goalsAction: () -> Void
-    var profileAction: () -> Void
-    var settingsAction: () -> Void
-    var helpAction: () -> Void
-    var logoutAction: () -> Void
+    @Binding var currentTab: Int
 
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
-            BottomBarItem(
-                icon: "house.fill",
-                label: "Home",
-                isSelected: selectedTab == .home,
-                action: {
-                    selectedTab = .home
-                    homeAction()
-                }
-            )
-            BottomBarItem(
-                icon: "target",
-                label: "Goals",
-                isSelected: selectedTab == .goals,
-                action: {
-                    selectedTab = .goals
-                    goalsAction()
-                }
-            )
-            BottomBarItem(
-                icon: "person.crop.circle",
-                label: "Profile",
-                isSelected: selectedTab == .profile,
-                action: {
-                    selectedTab = .profile
-                    profileAction()
-                }
-            )
+            BottomBarItem(icon: "house.fill", label: "Home", tabIndex: 0, currentTab: currentTab) {
+                currentTab = 0
+            }
+
+            BottomBarItem(icon: "target", label: "Goals", tabIndex: 1, currentTab: currentTab) {
+                currentTab = 1
+            }
+
+            BottomBarItem(icon: "person.crop.circle", label: "Profile", tabIndex: 2, currentTab: currentTab) {
+                currentTab = 2
+            }
 
             Menu {
-                Button("Settings", action: {
-                    selectedTab = .settings
-                    settingsAction()
-                })
-                Button("Help", action: {
-                    selectedTab = .help
-                    helpAction()
-                })
-                Button("Logout", action: {
-                    selectedTab = .logout
-                    logoutAction()
-                })
+                Button("Settings", action: {})
+                Button("Help", action: {})
+                Button("Logout", action: {})
             } label: {
                 VStack(spacing: 4) {
                     Image(systemName: "ellipsis.circle")
@@ -60,11 +28,7 @@ struct BottomBar: View {
                 }
                 .frame(maxHeight: .infinity)
                 .frame(maxWidth: .infinity)
-                .foregroundColor(
-                    [.settings, .help, .logout].contains(selectedTab ?? .home)
-                        ? .blue
-                        : .primary
-                )
+                .foregroundColor(.primary) 
             }
         }
         .frame(height: 70)
@@ -74,14 +38,17 @@ struct BottomBar: View {
 }
 
 
+
+
 struct BottomBarItem: View {
     var icon: String
     var label: String
-    var isSelected: Bool
-    var action: () -> Void
+    var tabIndex: Int
+    var currentTab: Int
+    var onTap: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(action: onTap) {
             VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 18))
@@ -90,24 +57,14 @@ struct BottomBarItem: View {
             }
             .frame(maxHeight: .infinity)
             .frame(maxWidth: .infinity)
-            .foregroundColor(.primary)
+            .foregroundColor(tabIndex == currentTab ? .blue : .primary)
         }
     }
 }
 
 
+
+
 #Preview {
-    VStack {
-        Spacer()
-        BottomBar(
-            selectedTab: .constant(.home),
-            homeAction: { print("Home tapped") },
-            goalsAction: { print("Goals tapped") },
-            profileAction: { print("Profile tapped") },
-            settingsAction: { print("Settings") },
-            helpAction: { print("Help") },
-            logoutAction: { print("Logout") }
-        )
-    }
-    .edgesIgnoringSafeArea(.bottom)
+    ContentView()
 }
