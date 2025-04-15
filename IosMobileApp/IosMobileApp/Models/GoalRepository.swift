@@ -1,51 +1,44 @@
-//
-//  GoalRepository.swift
-//  IosMobileApp
-//
-//  Created by Student on 14/04/2025.
-//
 import Foundation
-
 import GRDB
-import Combine
 
 class GoalRepository: ObservableObject {
     private let dbQueue: DatabaseQueue
-    
+
     init(dbQueue: DatabaseQueue) {
         self.dbQueue = dbQueue
     }
-    
-    // Create or update a goal
+
+    // Fetch all goals
+    func getGoals() throws -> [Goal] {
+        try dbQueue.read { db in
+            try Goal.fetchAll(db)
+        }
+    }
+
+    // Fetch goal by ID
+    func getGoalByID(goalID: UUID) -> Goal? {
+        do {
+            let goals = try dbQueue.read { db in
+                try Goal.fetchAll(db, sql: "SELECT * FROM goal WHERE id = ?", arguments: [goalID.uuidString])
+            }
+            return goals.first
+        } catch {
+            print("Error fetching goal: \(error)")
+            return nil
+        }
+    }
+
+    // Save a goal
     func saveGoal(_ goal: Goal) throws {
         try dbQueue.write { db in
             try goal.save(db)
         }
     }
-    
-    // Fetch goals for a specific user
-    func getGoals(for userId: UUID) throws -> [Goal] {
-        try dbQueue.read { db in
-            try Goal.filter(Goal.Columns.userId == userId.uuidString)
-                   .order(Goal.Columns.deadline.desc)
-                   .fetchAll(db)
-        }
-    }
-    
-    // Delete goal
+
+    // Delete a goal
     func deleteGoal(_ goal: Goal) throws {
         try dbQueue.write { db in
             try goal.delete(db)
-        }
-    }
-    
-    // Update goal progress
-    func updateGoalProgress(id: UUID, progress: Double) throws {
-        try dbQueue.write { db in
-            if var goal = try Goal.fetchOne(db, key: id.uuidString) {
-                goal.progress = progress
-                try goal.update(db)
-            }
         }
     }
 }
