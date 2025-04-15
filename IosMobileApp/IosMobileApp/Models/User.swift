@@ -7,7 +7,6 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
     var email: String
     var password: String
     var goals: [Goal] = [] 
-
     
     init(id: UUID = UUID(), username: String, email: String, password: String, goals: [Goal] = []) {
         self.id = id

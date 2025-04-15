@@ -1,35 +1,53 @@
-//
-//  QuoteRepository.swift
-//  IosMobileApp
-//
-//  Created by Student on 14/04/2025.
-//
-
-
+import Foundation
 import GRDB
 
 @MainActor
-final class QuoteRepository: ObservableObject {
+class QuoteRepository: ObservableObject {
     private let dbQueue: DatabaseQueue
-    @Published var quotes: [Quote] = []  // Add @Published property
     
     init(dbQueue: DatabaseQueue) {
         self.dbQueue = dbQueue
     }
     
-    // Fetch random quote
+    func createTable() throws {
+        try dbQueue.write { db in
+            try db.create(table: "quotes", ifNotExists: true) { t in
+                t.column("quote", .text).notNull()
+                t.column("author", .text).notNull()
+                t.column("html", .text).notNull()
+            }
+        }
+    }
+    
+    func saveQuote(_ quote: Quote) throws {
+        try dbQueue.write { db in
+            try quote.insert(db)
+        }
+    }
+    
+    func saveQuotes(_ quotes: [Quote]) throws {
+        try dbQueue.write { db in
+            for quote in quotes {
+                try quote.insert(db)
+            }
+        }
+    }
+    
+    func getQuotes() throws -> [Quote] {
+        try dbQueue.read { db in
+            try Quote.fetchAll(db)
+        }
+    }
+    
     func getRandomQuote() throws -> Quote? {
         try dbQueue.read { db in
             try Quote.order(sql: "RANDOM()").fetchOne(db)
         }
     }
     
-    // Save multiple quotes
-    func saveQuotes(_ quotes: [Quote]) throws {
+    func deleteAllQuotes() throws {
         try dbQueue.write { db in
-            for quote in quotes {
-                try quote.save(db)
-            }
+            try Quote.deleteAll(db)
         }
     }
 }

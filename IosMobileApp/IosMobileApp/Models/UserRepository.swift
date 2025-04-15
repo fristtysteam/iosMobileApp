@@ -7,15 +7,11 @@
 
 import GRDB
 import Foundation
-
-@MainActor // Add this since we'll be updating UI
-final class UserRepository: ObservableObject {  // Add ObservableObject conformance
+class UserRepository: ObservableObject {
     private let dbQueue: DatabaseQueue
-    @Published var users: [User] = []  // Add @Published property to trigger UI updates
     
     init(dbQueue: DatabaseQueue) {
         self.dbQueue = dbQueue
-        loadUsers()  // Load initial data
     }
     
     // Create or update a user

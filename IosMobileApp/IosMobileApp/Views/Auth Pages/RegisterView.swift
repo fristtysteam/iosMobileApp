@@ -104,24 +104,14 @@ struct RegisterView: View {
             userController.registrationSuccess = false
         }
         .overlay(
-            ZStack {
-                if userController.showError {
-                    VStack {
-                        Spacer()
-                        ToastView(message: userController.errorMessage)
-                            .padding(.bottom, 20)
-                    }
-                    .transition(.move(edge: .bottom))
-                    .animation(.easeInOut)
-                    .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                            withAnimation {
-                                userController.showError = false
-                            }
-                        }
-                    }
-                }
-            }
+            ToastView(
+                message: userController.errorMessage ?? "",
+                type: .error,
+                isShowing: .init(
+                    get: { userController.showError },
+                    set: { userController.showError = $0 }
+                )
+            )
         )
     }
 }

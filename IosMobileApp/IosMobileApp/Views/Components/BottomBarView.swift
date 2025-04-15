@@ -1,58 +1,38 @@
 import SwiftUI
 
-struct BottomBar: View {
-    @Binding var selectedTab: TabDestination?
-
-    var homeAction: () -> Void
-    var goalsAction: () -> Void
-    var profileAction: () -> Void
-    var settingsAction: () -> Void
-    var helpAction: () -> Void
-    var logoutAction: () -> Void
-
+struct BottomBarView: View {
+    @Binding var currentTab: Int
+    
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
             BottomBarItem(
                 icon: "house.fill",
                 label: "Home",
-                isSelected: selectedTab == .home,
-                action: {
-                    selectedTab = .home
-                    homeAction()
-                }
+                tabIndex: 0,
+                currentTab: currentTab,
+                action: { currentTab = 0 }
             )
+            
             BottomBarItem(
                 icon: "target",
                 label: "Goals",
-                isSelected: selectedTab == .goals,
-                action: {
-                    selectedTab = .goals
-                    goalsAction()
-                }
+                tabIndex: 1,
+                currentTab: currentTab,
+                action: { currentTab = 1 }
             )
+            
             BottomBarItem(
                 icon: "person.crop.circle",
                 label: "Profile",
-                isSelected: selectedTab == .profile,
-                action: {
-                    selectedTab = .profile
-                    profileAction()
-                }
+                tabIndex: 2,
+                currentTab: currentTab,
+                action: { currentTab = 2 }
             )
-
+            
             Menu {
-                Button("Settings", action: {
-                    selectedTab = .settings
-                    settingsAction()
-                })
-                Button("Help", action: {
-                    selectedTab = .help
-                    helpAction()
-                })
-                Button("Logout", action: {
-                    selectedTab = .logout
-                    logoutAction()
-                })
+                Button("Settings", action: {})
+                Button("Help", action: {})
+                Button("Logout", action: {})
             } label: {
                 VStack(spacing: 4) {
                     Image(systemName: "ellipsis.circle")
@@ -61,9 +41,7 @@ struct BottomBar: View {
                 .frame(maxHeight: .infinity)
                 .frame(maxWidth: .infinity)
                 .foregroundColor(
-                    [.settings, .help, .logout].contains(selectedTab ?? .home)
-                        ? .blue
-                        : .primary
+                    currentTab > 2 ? .blue : .primary
                 )
             }
         }
@@ -73,13 +51,13 @@ struct BottomBar: View {
     }
 }
 
-
 struct BottomBarItem: View {
-    var icon: String
-    var label: String
-    var isSelected: Bool
-    var action: () -> Void
-
+    let icon: String
+    let label: String
+    let tabIndex: Int
+    let currentTab: Int
+    let action: () -> Void
+    
     var body: some View {
         Button(action: action) {
             VStack(spacing: 4) {
@@ -90,24 +68,24 @@ struct BottomBarItem: View {
             }
             .frame(maxHeight: .infinity)
             .frame(maxWidth: .infinity)
-            .foregroundColor(.primary)
+            .foregroundColor(tabIndex == currentTab ? .blue : .primary)
         }
     }
 }
 
-
-#Preview {
-    VStack {
-        Spacer()
-        BottomBar(
-            selectedTab: .constant(.home),
-            homeAction: { print("Home tapped") },
-            goalsAction: { print("Goals tapped") },
-            profileAction: { print("Profile tapped") },
-            settingsAction: { print("Settings") },
-            helpAction: { print("Help") },
-            logoutAction: { print("Logout") }
-        )
+struct BottomBarView_Previews: PreviewProvider {
+    static var previews: some View {
+        PreviewWrapper()
     }
-    .edgesIgnoringSafeArea(.bottom)
+    
+    struct PreviewWrapper: View {
+        @State private var currentTab = 0
+        
+        var body: some View {
+            VStack {
+                Spacer()
+                BottomBarView(currentTab: $currentTab)
+            }
+        }
+    }
 }
