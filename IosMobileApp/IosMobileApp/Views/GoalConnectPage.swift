@@ -117,7 +117,7 @@ struct GoalConnectPage: View {
             }
         }
         .navigationDestination(isPresented: $showingAnalytics) {
-            AnalyticsView()
+            AnalyticsView().environmentObject(goalController)
         }
     }
 }

@@ -1,6 +1,49 @@
 import SwiftUI
 import GRDB
 
+enum GoalCategory: String, CaseIterable {
+    case personal = "Personal Growth"
+    case career = "Career & Work"
+    case health = "Health & Wellness"
+    case learning = "Learning & Skills"
+    case financial = "Financial"
+    case relationships = "Relationships"
+    case fitness = "Fitness"
+    case mindfulness = "Mindfulness"
+    case productivity = "Productivity"
+    case creativity = "Creativity"
+    
+    var icon: String {
+        switch self {
+        case .personal: return "person.fill"
+        case .career: return "briefcase.fill"
+        case .health: return "heart.fill"
+        case .learning: return "book.fill"
+        case .financial: return "dollarsign.circle.fill"
+        case .relationships: return "person.2.fill"
+        case .fitness: return "figure.run"
+        case .mindfulness: return "brain.head.profile"
+        case .productivity: return "chart.bar.fill"
+        case .creativity: return "paintbrush.fill"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .personal: return .blue
+        case .career: return .purple
+        case .health: return .green
+        case .learning: return .orange
+        case .financial: return .mint
+        case .relationships: return .pink
+        case .fitness: return .red
+        case .mindfulness: return .indigo
+        case .productivity: return .teal
+        case .creativity: return .yellow
+        }
+    }
+}
+
 struct AddGoalView: View {
     let onGoalAdded: (UUID) -> Void
     @EnvironmentObject var goalController: GoalController
@@ -9,11 +52,14 @@ struct AddGoalView: View {
     
     @State private var title: String = ""
     @State private var description: String = ""
-    @State private var category: String = ""
+    @State private var selectedCategory: GoalCategory = .personal
     @State private var deadline: Date = Date()
     @State private var progress: Double = 0.0
     @State private var isCompleted: Bool = false
     @State private var showToast = false
+    @State private var showingDatePicker = false
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
     
     var body: some View {
         NavigationView {
@@ -26,10 +72,23 @@ struct AddGoalView: View {
                     TextField("Description", text: $description)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding(.vertical, 8)
-
-                    TextField("Category", text: $category)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                
+                Section(header: Text("Category")) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(GoalCategory.allCases, id: \.self) { category in
+                                CategoryButton(
+                                    category: category,
+                                    isSelected: selectedCategory == category,
+                                    action: { selectedCategory = category }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 4)
                         .padding(.vertical, 8)
+                    }
+                    .listRowInsets(EdgeInsets())
                 }
                 
                 Section(header: Text("Goal Settings").font(.headline).foregroundColor(.blue)) {
@@ -80,6 +139,30 @@ struct AddGoalView: View {
                     isShowing: $showToast
                 )
             )
+            .sheet(isPresented: $showingDatePicker) {
+                NavigationView {
+                    DatePicker("Select Deadline",
+                              selection: $deadline,
+                              in: Date()...,
+                              displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.graphical)
+                        .navigationTitle("Select Deadline")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") {
+                                    showingDatePicker = false
+                                }
+                            }
+                        }
+                }
+                .presentationDetents([.medium])
+            }
+            .alert("Error", isPresented: $showingAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(alertMessage)
+            }
         }
         .accentColor(.blue)
     }
@@ -88,7 +171,7 @@ struct AddGoalView: View {
         let newGoal = Goal(
             title: title,
             description: description.isEmpty ? nil : description,
-            category: category.isEmpty ? nil : category,
+            category: selectedCategory.rawValue,
             deadline: deadline,
             progress: progress,
             isCompleted: isCompleted
@@ -97,7 +180,7 @@ struct AddGoalView: View {
         if let createdGoalID = await goalController.createGoal(
             title: title,
             description: description.isEmpty ? nil : description,
-            category: category.isEmpty ? nil : category,
+            category: selectedCategory.rawValue,
             deadline: deadline,
             progress: progress,
             isCompleted: isCompleted
@@ -111,6 +194,38 @@ struct AddGoalView: View {
                 onGoalAdded(createdGoalID)
                 presentationMode.wrappedValue.dismiss()
             }
+        } else {
+            alertMessage = "Failed to create goal"
+            showingAlert = true
+        }
+    }
+}
+
+struct CategoryButton: View {
+    let category: GoalCategory
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: category.icon)
+                    .font(.system(size: 24))
+                Text(category.rawValue)
+                    .font(.caption)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(width: 80)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? category.color.opacity(0.2) : Color(.systemGray6))
+            )
+            .foregroundColor(isSelected ? category.color : .primary)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? category.color : Color.clear, lineWidth: 2)
+            )
         }
     }
 }
