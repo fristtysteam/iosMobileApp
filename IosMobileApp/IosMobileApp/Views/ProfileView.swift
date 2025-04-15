@@ -9,9 +9,8 @@ struct ProfileSettingsView: View {
     var body: some View {
         NavigationView {
             VStack(alignment: .leading) {
-                // Profile Picture
                 HStack {
-                    Image("profile_pic") // Replace with your image name
+                    Image("profile_pic")
                         .resizable()
                         .scaledToFill()
                         .frame(width: 100, height: 100)
@@ -27,13 +26,12 @@ struct ProfileSettingsView: View {
                     .padding(.leading)
                 }
 
-                // Notifications Toggle
+               
                 Toggle(isOn: $notificationsEnabled) {
                     Text("Enable Notifications")
                 }
                 .padding()
                 
-                // Data Sharing Toggle
                 Toggle(isOn: $dataSharingEnabled) {
                     Text("Share Data")
                 }

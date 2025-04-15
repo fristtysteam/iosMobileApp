@@ -1,73 +1,113 @@
 import SwiftUI
 
 struct BottomBar: View {
-    var addButtonAction: () -> Void
-    var homeAction: () -> Void = {}
-    var goalsAction: () -> Void = {}
-    var profileAction: () -> Void = {}
-    var settingsAction: () -> Void = {}
-    var helpAction: () -> Void = {}
-    var logoutAction: () -> Void = {}
+    @Binding var selectedTab: TabDestination?
+
+    var homeAction: () -> Void
+    var goalsAction: () -> Void
+    var profileAction: () -> Void
+    var settingsAction: () -> Void
+    var helpAction: () -> Void
+    var logoutAction: () -> Void
 
     var body: some View {
-        ZStack {
-            HStack {
-                Button(action: homeAction) {
-                    VStack {
-                        Image(systemName: "house.fill")
-                        Text("Home")
-                    }
+        HStack(alignment: .center, spacing: 0) {
+            BottomBarItem(
+                icon: "house.fill",
+                label: "Home",
+                isSelected: selectedTab == .home,
+                action: {
+                    selectedTab = .home
+                    homeAction()
                 }
-                .frame(maxWidth: .infinity)
-                .foregroundColor(.primary)
+            )
+            BottomBarItem(
+                icon: "target",
+                label: "Goals",
+                isSelected: selectedTab == .goals,
+                action: {
+                    selectedTab = .goals
+                    goalsAction()
+                }
+            )
+            BottomBarItem(
+                icon: "person.crop.circle",
+                label: "Profile",
+                isSelected: selectedTab == .profile,
+                action: {
+                    selectedTab = .profile
+                    profileAction()
+                }
+            )
 
-                Button(action: goalsAction) {
-                    VStack {
-                        Image(systemName: "target")
-                        Text("Goals")
-                    }
+            Menu {
+                Button("Settings", action: {
+                    selectedTab = .settings
+                    settingsAction()
+                })
+                Button("Help", action: {
+                    selectedTab = .help
+                    helpAction()
+                })
+                Button("Logout", action: {
+                    selectedTab = .logout
+                    logoutAction()
+                })
+            } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: "ellipsis.circle")
+                    Text("More")
                 }
+                .frame(maxHeight: .infinity)
                 .frame(maxWidth: .infinity)
-                .foregroundColor(.primary)
-
-               
-                Button(action: profileAction) {
-                    VStack {
-                        Image(systemName: "person.crop.circle")
-                        Text("Profile")
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundColor(.primary)
-
-                Menu {
-                    Button("Settings", action: settingsAction)
-                    Button("Help", action: helpAction)
-                    Button("Logout", action: logoutAction)
-                } label: {
-                    VStack {
-                        Image(systemName: "ellipsis.circle")
-                        Text("More")
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundColor(.primary)
+                .foregroundColor(
+                    [.settings, .help, .logout].contains(selectedTab ?? .home)
+                        ? .blue
+                        : .primary
+                )
             }
-            .padding(.horizontal)
-            .padding(.bottom, 10)
-            .frame(height: 70)
-            .background(Color(.systemBackground).ignoresSafeArea())
-            .shadow(radius: 3)
+        }
+        .frame(height: 70)
+        .background(Color(.systemBackground).ignoresSafeArea(edges: .bottom))
+        .shadow(radius: 3)
+    }
+}
 
 
-        
-            .offset(y: -28)
+struct BottomBarItem: View {
+    var icon: String
+    var label: String
+    var isSelected: Bool
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                Text(label)
+                    .font(.caption)
+            }
+            .frame(maxHeight: .infinity)
+            .frame(maxWidth: .infinity)
+            .foregroundColor(.primary)
         }
     }
 }
 
+
 #Preview {
-    BottomBar(addButtonAction: {
-        print("Add tapped")
-    })
+    VStack {
+        Spacer()
+        BottomBar(
+            selectedTab: .constant(.home),
+            homeAction: { print("Home tapped") },
+            goalsAction: { print("Goals tapped") },
+            profileAction: { print("Profile tapped") },
+            settingsAction: { print("Settings") },
+            helpAction: { print("Help") },
+            logoutAction: { print("Logout") }
+        )
+    }
+    .edgesIgnoringSafeArea(.bottom)
 }

@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3F20A2A72DAD6C4E0007244D /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F20A2A52DAD6C4E0007244D /* DatabaseManager.swift */; };
 		3F2951562D9FFB8300E6627C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3F2951552D9FFB7C00E6627C /* .gitignore */; };
+		3FA3CF9A2DAD67AB00BC48D6 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3FA3CF992DAD67AB00BC48D6 /* GRDB */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,7 +29,41 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		3FA3CF072DAD648D00BC48D6 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3FA3CF092DAD64CC00BC48D6 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3FA3CF0B2DAD64CF00BC48D6 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		3F20A2A52DAD6C4E0007244D /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		3F2951552D9FFB7C00E6627C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		3F9C48622D844D0200D7A051 /* IosMobileApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IosMobileApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F9C48722D844D0300D7A051 /* IosMobileAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IosMobileAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -57,6 +93,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3FA3CF9A2DAD67AB00BC48D6 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +114,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3F20A2A62DAD6C4E0007244D /* database */ = {
+			isa = PBXGroup;
+			children = (
+				3F20A2A52DAD6C4E0007244D /* DatabaseManager.swift */,
+			);
+			path = database;
+			sourceTree = "<group>";
+		};
 		3F9C48592D844D0200D7A051 = {
 			isa = PBXGroup;
 			children = (
@@ -84,7 +129,9 @@
 				3F9C48642D844D0200D7A051 /* IosMobileApp */,
 				3F9C48752D844D0300D7A051 /* IosMobileAppTests */,
 				3F9C487F2D844D0300D7A051 /* IosMobileAppUITests */,
+				3FA3CF9B2DAD67BB00BC48D6 /* Frameworks */,
 				3F9C48632D844D0200D7A051 /* Products */,
+				3F20A2A62DAD6C4E0007244D /* database */,
 			);
 			sourceTree = "<group>";
 		};
@@ -98,6 +145,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		3FA3CF9B2DAD67BB00BC48D6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -108,6 +162,7 @@
 				3F9C485E2D844D0200D7A051 /* Sources */,
 				3F9C485F2D844D0200D7A051 /* Frameworks */,
 				3F9C48602D844D0200D7A051 /* Resources */,
+				3FA3CF072DAD648D00BC48D6 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -118,6 +173,7 @@
 			);
 			name = IosMobileApp;
 			packageProductDependencies = (
+				3FA3CF992DAD67AB00BC48D6 /* GRDB */,
 			);
 			productName = IosMobileApp;
 			productReference = 3F9C48622D844D0200D7A051 /* IosMobileApp.app */;
@@ -130,6 +186,7 @@
 				3F9C486E2D844D0300D7A051 /* Sources */,
 				3F9C486F2D844D0300D7A051 /* Frameworks */,
 				3F9C48702D844D0300D7A051 /* Resources */,
+				3FA3CF092DAD64CC00BC48D6 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -153,6 +210,7 @@
 				3F9C48782D844D0300D7A051 /* Sources */,
 				3F9C48792D844D0300D7A051 /* Frameworks */,
 				3F9C487A2D844D0300D7A051 /* Resources */,
+				3FA3CF0B2DAD64CF00BC48D6 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -201,6 +259,9 @@
 			);
 			mainGroup = 3F9C48592D844D0200D7A051;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3FA3CF982DAD67AB00BC48D6 /* XCRemoteSwiftPackageReference "GRDB" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3F9C48632D844D0200D7A051 /* Products */;
 			projectDirPath = "";
@@ -243,6 +304,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F20A2A72DAD6C4E0007244D /* DatabaseManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,6 +472,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -417,9 +480,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sd4a.IosMobileApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -438,6 +505,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -445,9 +513,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sd4a.IosMobileApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -462,9 +534,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sd4a.IosMobileAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IosMobileApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IosMobileApp";
 			};
 			name = Debug;
@@ -480,9 +556,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sd4a.IosMobileAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IosMobileApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IosMobileApp";
 			};
 			name = Release;
@@ -496,9 +576,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sd4a.IosMobileAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = IosMobileApp;
 			};
 			name = Debug;
@@ -512,9 +596,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sd4a.IosMobileAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = IosMobileApp;
 			};
 			name = Release;
@@ -559,6 +647,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3FA3CF982DAD67AB00BC48D6 /* XCRemoteSwiftPackageReference "GRDB" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3FA3CF992DAD67AB00BC48D6 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3FA3CF982DAD67AB00BC48D6 /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3F9C485A2D844D0200D7A051 /* Project object */;
 }
