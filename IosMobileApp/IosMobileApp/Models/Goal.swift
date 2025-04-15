@@ -1,7 +1,6 @@
 import Foundation
 import GRDB
 
-
 struct Goal: Identifiable, Codable, FetchableRecord, PersistableRecord {
     var id: UUID
     var userId: UUID?
@@ -12,7 +11,7 @@ struct Goal: Identifiable, Codable, FetchableRecord, PersistableRecord {
     var progress: Double
     var isCompleted: Bool
     var progressDiary: [String]
-    
+
     init(id: UUID = UUID(), title: String, description: String? = nil, category: String? = nil,
          deadline: Date? = nil, progress: Double = 0.0, isCompleted: Bool = false,
          progressDiary: [String] = []) {
@@ -25,7 +24,7 @@ struct Goal: Identifiable, Codable, FetchableRecord, PersistableRecord {
         self.isCompleted = isCompleted
         self.progressDiary = progressDiary
     }
-    
+
     enum Columns {
         static let id = Column(CodingKeys.id)
         static let userId = Column(CodingKeys.userId)
@@ -37,7 +36,7 @@ struct Goal: Identifiable, Codable, FetchableRecord, PersistableRecord {
         static let isCompleted = Column(CodingKeys.isCompleted)
         static let progressDiary = Column(CodingKeys.progressDiary)
     }
-    
+
     func encode(to container: inout PersistenceContainer) {
         container["id"] = id.uuidString
         container["userId"] = userId?.uuidString
@@ -47,13 +46,12 @@ struct Goal: Identifiable, Codable, FetchableRecord, PersistableRecord {
         container["deadline"] = deadline
         container["progress"] = progress
         container["isCompleted"] = isCompleted
-        
-        // Convert progressDiary array to JSON data
+
         if let data = try? JSONEncoder().encode(progressDiary) {
             container["progressDiary"] = data
         }
     }
-    
+
     init(row: Row) throws {
         id = UUID(uuidString: row["id"]) ?? UUID()
         if let userIdString = row["userId"] as String? {
@@ -65,8 +63,6 @@ struct Goal: Identifiable, Codable, FetchableRecord, PersistableRecord {
         deadline = row["deadline"]
         progress = row["progress"]
         isCompleted = row["isCompleted"]
-        
-        // Convert JSON data back to array
         if let data = row["progressDiary"] as Data? {
             progressDiary = (try? JSONDecoder().decode([String].self, from: data)) ?? []
         } else {

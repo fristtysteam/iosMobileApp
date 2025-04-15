@@ -1,22 +1,34 @@
 import SwiftUI
 
-struct BottomBar: View {
+struct BottomBarView: View {
     @Binding var currentTab: Int
-
+    
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
-            BottomBarItem(icon: "house.fill", label: "Home", tabIndex: 0, currentTab: currentTab) {
-                currentTab = 0
-            }
-
-            BottomBarItem(icon: "target", label: "Goals", tabIndex: 1, currentTab: currentTab) {
-                currentTab = 1
-            }
-
-            BottomBarItem(icon: "person.crop.circle", label: "Profile", tabIndex: 2, currentTab: currentTab) {
-                currentTab = 2
-            }
-
+            BottomBarItem(
+                icon: "house.fill",
+                label: "Home",
+                tabIndex: 0,
+                currentTab: currentTab,
+                action: { currentTab = 0 }
+            )
+            
+            BottomBarItem(
+                icon: "target",
+                label: "Goals",
+                tabIndex: 1,
+                currentTab: currentTab,
+                action: { currentTab = 1 }
+            )
+            
+            BottomBarItem(
+                icon: "person.crop.circle",
+                label: "Profile",
+                tabIndex: 2,
+                currentTab: currentTab,
+                action: { currentTab = 2 }
+            )
+            
             Menu {
                 Button("Settings", action: {})
                 Button("Help", action: {})
@@ -28,7 +40,7 @@ struct BottomBar: View {
                 }
                 .frame(maxHeight: .infinity)
                 .frame(maxWidth: .infinity)
-                .foregroundColor(.primary) 
+                .foregroundColor(.primary)
             }
         }
         .frame(height: 70)
@@ -37,18 +49,15 @@ struct BottomBar: View {
     }
 }
 
-
-
-
 struct BottomBarItem: View {
-    var icon: String
-    var label: String
-    var tabIndex: Int
-    var currentTab: Int
-    var onTap: () -> Void
-
+    let icon: String
+    let label: String
+    let tabIndex: Int
+    let currentTab: Int
+    let action: () -> Void
+    
     var body: some View {
-        Button(action: onTap) {
+        Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 18))
@@ -62,9 +71,19 @@ struct BottomBarItem: View {
     }
 }
 
-
-
-
-#Preview {
-    ContentView()
+struct BottomBarView_Previews: PreviewProvider {
+    static var previews: some View {
+        PreviewWrapper()
+    }
+    
+    struct PreviewWrapper: View {
+        @State private var currentTab = 0
+        
+        var body: some View {
+            VStack {
+                Spacer()
+                BottomBarView(currentTab: $currentTab)
+            }
+        }
+    }
 }
