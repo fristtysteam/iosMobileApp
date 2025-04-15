@@ -14,7 +14,9 @@ struct IosMobileAppApp: App {
         goalRepository = GoalRepository(dbQueue: dbQueue)
         quoteRepository = QuoteRepository(dbQueue: dbQueue)
         
-       
+        // You could also print or handle errors if necessary
+        // For example:
+        // databaseManager.printDatabasePath()
     }
     
     var body: some Scene {
