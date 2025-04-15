@@ -16,15 +16,9 @@ class GoalRepository: ObservableObject {
     }
 
     // Fetch goal by ID
-    func getGoalByID(goalID: UUID) -> Goal? {
-        do {
-            let goals = try dbQueue.read { db in
-                try Goal.fetchAll(db, sql: "SELECT * FROM goal WHERE id = ?", arguments: [goalID.uuidString])
-            }
-            return goals.first
-        } catch {
-            print("Error fetching goal: \(error)")
-            return nil
+    func getGoalByID(goalID: UUID) async throws -> Goal? {
+        try await dbQueue.read { db in
+            try Goal.filter(Column("id") == goalID.uuidString).fetchOne(db)
         }
     }
 
@@ -39,6 +33,13 @@ class GoalRepository: ObservableObject {
     func deleteGoal(_ goal: Goal) throws {
         try dbQueue.write { db in
             try goal.delete(db)
+        }
+    }
+    
+    // Clear all goals
+    func clearAllGoals() throws {
+        try dbQueue.write { db in
+            _ = try Goal.deleteAll(db)
         }
     }
 }

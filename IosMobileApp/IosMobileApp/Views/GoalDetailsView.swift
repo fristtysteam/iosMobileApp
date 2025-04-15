@@ -13,40 +13,65 @@ struct GoalDetailsView: View {
     @State private var editedProgress: Double
     @State private var showAddProgressEntry = false
     @State private var newProgressEntry = ""
+    @State private var isLoading = true
     
     init(goalID: UUID) {
         self.goalID = goalID
-        // Initialize editedProgress with 0, will be updated in onAppear
         _editedProgress = State(initialValue: 0.0)
     }
     
     var body: some View {
-        ScrollView {
-            if let goal = goal {
-                VStack(spacing: 24) {
-                    // Header Section
-                    headerSection(goal)
-                    
-                    // Progress Section
-                    progressSection(goal)
-                    
-                    // Details Section
-                    detailsSection(goal)
-                    
-                    // Progress Diary Section
-                    progressDiarySection(goal)
-                    
-                    // Action Buttons
-                    actionButtons(goal)
-                }
-                .padding()
+        Group {
+            if isLoading {
+                loadingView
+            } else if let goal = goal {
+                goalContent(goal)
             } else {
-                ProgressView()
-                    .padding()
+                errorView
             }
         }
         .navigationTitle("Goal Details")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            loadGoal()
+        }
+    }
+    
+    private var loadingView: some View {
+        VStack {
+            ProgressView()
+            Text("Loading goal details...")
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    private var errorView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 50))
+                .foregroundColor(.orange)
+            Text("Unable to load goal")
+                .font(.headline)
+            Text("Please try again later")
+                .foregroundColor(.secondary)
+            Button("Retry") {
+                loadGoal()
+            }
+            .buttonStyle(.bordered)
+        }
+    }
+    
+    private func goalContent(_ goal: Goal) -> some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                headerSection(goal)
+                progressSection(goal)
+                detailsSection(goal)
+                progressDiarySection(goal)
+                actionButtons(goal)
+            }
+            .padding()
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
@@ -75,9 +100,6 @@ struct GoalDetailsView: View {
         }
         .sheet(isPresented: $showAddProgressEntry) {
             addProgressEntrySheet
-        }
-        .onAppear {
-            loadGoal()
         }
     }
     
@@ -267,11 +289,13 @@ struct GoalDetailsView: View {
     }
     
     private func loadGoal() {
+        isLoading = true
         Task {
             if let loadedGoal = await goalController.getGoalByID(goalID) {
                 goal = loadedGoal
                 editedProgress = loadedGoal.progress
             }
+            isLoading = false
         }
     }
     

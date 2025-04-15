@@ -100,10 +100,11 @@ struct GoalConnectPage: View {
             }
         }
         .navigationDestination(isPresented: $showingAddGoal) {
-            AddGoalView(onGoalAdded: {
+            AddGoalView(onGoalAdded: { newGoalID in
                 Task {
                     await goalController.loadGoals()
-                    showingGoalsList = true
+                    selectedGoalID = newGoalID
+                    showingGoalDetails = true
                 }
             })
         }

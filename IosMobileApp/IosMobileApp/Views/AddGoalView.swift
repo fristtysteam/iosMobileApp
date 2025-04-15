@@ -2,7 +2,7 @@ import SwiftUI
 import GRDB
 
 struct AddGoalView: View {
-    let onGoalAdded: () -> Void
+    let onGoalAdded: (UUID) -> Void
     @EnvironmentObject var goalController: GoalController
     @Environment(\.dismiss) var dismiss
     @Environment(\.presentationMode) var presentationMode
@@ -85,7 +85,7 @@ struct AddGoalView: View {
     }
     
     private func saveGoal() async {
-        let success = await goalController.createGoal(
+        let newGoal = Goal(
             title: title,
             description: description.isEmpty ? nil : description,
             category: category.isEmpty ? nil : category,
@@ -94,14 +94,21 @@ struct AddGoalView: View {
             isCompleted: isCompleted
         )
         
-        if success {
+        if let createdGoalID = await goalController.createGoal(
+            title: title,
+            description: description.isEmpty ? nil : description,
+            category: category.isEmpty ? nil : category,
+            deadline: deadline,
+            progress: progress,
+            isCompleted: isCompleted
+        ) {
             withAnimation {
                 showToast = true
             }
             
             // Wait for the toast to show before dismissing
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                onGoalAdded()
+                onGoalAdded(createdGoalID)
                 presentationMode.wrappedValue.dismiss()
             }
         }
@@ -117,7 +124,7 @@ struct AddGoalView_Previews: PreviewProvider {
         
         return VStack {
             HeaderView(title: "Achievr")
-            AddGoalView(onGoalAdded: {})
+            AddGoalView(onGoalAdded: { _ in })
                 .environmentObject(controller)
         }
     }

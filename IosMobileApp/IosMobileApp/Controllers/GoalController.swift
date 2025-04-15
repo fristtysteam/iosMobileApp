@@ -27,7 +27,7 @@ class GoalController: ObservableObject {
         isLoading = false
     }
     
-    func createGoal(title: String, description: String?, category: String?, deadline: Date?, progress: Double, isCompleted: Bool) async -> Bool {
+    func createGoal(title: String, description: String?, category: String?, deadline: Date?, progress: Double, isCompleted: Bool) async -> UUID? {
         isLoading = true
         do {
             let newGoal = Goal(
@@ -41,12 +41,12 @@ class GoalController: ObservableObject {
             
             try await goalRepository.saveGoal(newGoal)
             await loadGoals() // Refresh goals list
-            return true
+            return newGoal.id
         } catch {
             errorMessage = "Failed to create goal: \(error.localizedDescription)"
             showError = true
             isLoading = false
-            return false
+            return nil
         }
     }
     
@@ -80,11 +80,37 @@ class GoalController: ObservableObject {
     
     func getGoalByID(_ id: UUID) async -> Goal? {
         do {
-            return try await goalRepository.getGoalByID(goalID: id)
+            // First try to find the goal in the current goals array
+            if let goal = goals.first(where: { $0.id == id }) {
+                return goal
+            }
+            
+            // If not found in memory, try to fetch from database
+            if let goal = try await goalRepository.getGoalByID(goalID: id) {
+                return goal
+            } else {
+                errorMessage = "Goal not found"
+                showError = true
+                return nil
+            }
         } catch {
             errorMessage = "Failed to fetch goal: \(error.localizedDescription)"
             showError = true
             return nil
+        }
+    }
+    
+    func clearAllGoals() async -> Bool {
+        isLoading = true
+        do {
+            try await goalRepository.clearAllGoals()
+            await loadGoals() // Refresh goals list to empty array
+            return true
+        } catch {
+            errorMessage = "Failed to clear goals: \(error.localizedDescription)"
+            showError = true
+            isLoading = false
+            return false
         }
     }
     

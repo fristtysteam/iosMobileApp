@@ -6,6 +6,10 @@ struct GoalListView: View {
     @State private var selectedFilter: GoalFilter = .all
     @State private var showingSortOptions = false
     @State private var sortOrder: GoalSortOrder = .dateCreated
+    @State private var showingClearConfirmation = false
+    @State private var showToast = false
+    @State private var toastMessage = ""
+    @State private var toastType: ToastType = .success
     
     private var filteredGoals: [Goal] {
         var goals = goalController.goals
@@ -80,6 +84,13 @@ struct GoalListView: View {
                         NavigationLink(destination: GoalDetailsView(goalID: goal.id)) {
                             GoalRowView(goal: goal)
                         }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                deleteGoal(goal)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())
@@ -89,8 +100,16 @@ struct GoalListView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showingSortOptions = true }) {
-                    Image(systemName: "arrow.up.arrow.down")
+                Menu {
+                    Button(action: { showingSortOptions = true }) {
+                        Label("Sort Goals", systemImage: "arrow.up.arrow.down")
+                    }
+                    
+                    Button(role: .destructive, action: { showingClearConfirmation = true }) {
+                        Label("Clear All Goals", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
@@ -105,11 +124,48 @@ struct GoalListView: View {
                 ]
             )
         }
+        .alert("Clear All Goals", isPresented: $showingClearConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear All", role: .destructive) {
+                clearAllGoals()
+            }
+        } message: {
+            Text("Are you sure you want to delete all goals? This action cannot be undone.")
+        }
+        .overlay(
+            ToastView(
+                message: toastMessage,
+                type: toastType,
+                isShowing: $showToast
+            )
+        )
         .onAppear {
             Task {
                 await goalController.loadGoals()
             }
         }
+    }
+    
+    private func deleteGoal(_ goal: Goal) {
+        Task {
+            if await goalController.deleteGoal(goal) {
+                showToast(message: "Goal deleted successfully", type: .success)
+            }
+        }
+    }
+    
+    private func clearAllGoals() {
+        Task {
+            if await goalController.clearAllGoals() {
+                showToast(message: "All goals cleared successfully", type: .success)
+            }
+        }
+    }
+    
+    private func showToast(message: String, type: ToastType) {
+        toastMessage = message
+        toastType = type
+        showToast = true
     }
     
     private var emptyStateView: some View {
