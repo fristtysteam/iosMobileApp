@@ -12,6 +12,7 @@ struct CustomPagingSlider<Title: View, GoalCollection: RandomAccessCollection>: 
     
     @Binding var data: GoalCollection
     @ViewBuilder var title: (Binding<GoalCollection.Element>) -> Title
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(spacing: pagingControlSpacing) {
@@ -21,11 +22,6 @@ struct CustomPagingSlider<Title: View, GoalCollection: RandomAccessCollection>: 
                         VStack(spacing: 0) {
                             title(item)
                                 .frame(width: 350, height: 200)
-                                .background(Color.white)
-                                .cornerRadius(8)
-                                .shadow(color: .gray.opacity(0.5), radius: 4, x: 0, y: 2)
-                                .padding(15)
-                            
                         }
                     }
                 }

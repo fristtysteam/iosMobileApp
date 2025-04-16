@@ -7,6 +7,7 @@ struct ProfileView: View {
     @State private var showEditProfile = false
     @State private var showLogoutAlert = false
     @EnvironmentObject var authController: AuthController
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         NavigationView {
@@ -58,6 +59,17 @@ struct ProfileView: View {
                         }
                     }
                     
+                    Section(header: Text("Appearance")) {
+                        Button(action: { themeManager.toggleTheme() }) {
+                            HStack {
+                                Image(systemName: themeManager.colorScheme == .dark ? "moon.fill" : "sun.max.fill")
+                                Text("Dark Mode")
+                                Spacer()
+                                Image(systemName: themeManager.colorScheme == .dark ? "checkmark.circle.fill" : "circle")
+                            }
+                        }
+                    }
+                    
                     Section {
                         Button(action: { showLogoutAlert = true }) {
                             HStack {
@@ -93,9 +105,13 @@ struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         let dbQueue = try! DatabaseQueue()
         let userRepository = UserRepository(dbQueue: dbQueue)
+        let goalRepository = GoalRepository(dbQueue: dbQueue)
+        let authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
+        let themeManager = ThemeManager()
         
         return ProfileView()
-            .environmentObject(AuthController(userRepository: userRepository))
+            .environmentObject(authController)
+            .environmentObject(themeManager)
     }
 }
 

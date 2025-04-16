@@ -30,9 +30,11 @@ class AuthController: ObservableObject {
     
     private(set) var currentUser: User?
     private let userRepository: UserRepository
+    private let goalRepository: GoalRepository
     
-    init(userRepository: UserRepository) {
+    init(userRepository: UserRepository, goalRepository: GoalRepository) {
         self.userRepository = userRepository
+        self.goalRepository = goalRepository
         Task {
             await loadUsers()
         }
@@ -126,13 +128,18 @@ class AuthController: ObservableObject {
             // Delete all users from database
             try await userRepository.deleteAllUsers()
             
+            // Delete all goals from database
+            try await goalRepository.clearAllGoals()
+            
             // Clear local state
             users = []
             currentUser = nil
             isAuthenticated = false
             loadUserDetails()
+            
+            print("Successfully wiped all data")
         } catch {
-            errorMessage = "Failed to wipe user data: \(error.localizedDescription)"
+            errorMessage = "Failed to wipe data: \(error.localizedDescription)"
             showError = true
         }
     }

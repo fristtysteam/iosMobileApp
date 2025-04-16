@@ -170,7 +170,8 @@ struct AuthView_Previews: PreviewProvider {
     static var previews: some View {
         let dbQueue = try! DatabaseQueue()
         let userRepository = UserRepository(dbQueue: dbQueue)
-        let authController = AuthController(userRepository: userRepository)
+        let goalRepository = GoalRepository(dbQueue: dbQueue)
+        let authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
         AuthView()
             .environmentObject(authController)
     }

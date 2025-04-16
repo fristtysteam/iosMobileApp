@@ -234,7 +234,10 @@ struct EditProfileView_Previews: PreviewProvider {
     static var previews: some View {
         let dbQueue = try! DatabaseQueue()
         let userRepository = UserRepository(dbQueue: dbQueue)
+        let goalRepository = GoalRepository(dbQueue: dbQueue)
+        let authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
+        
         EditProfileView(currentUsername: "test_user", currentEmail: "test@example.com")
-            .environmentObject(AuthController(userRepository: userRepository))
+            .environmentObject(authController)
     }
 } 

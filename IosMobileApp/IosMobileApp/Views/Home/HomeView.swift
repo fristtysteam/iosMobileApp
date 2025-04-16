@@ -6,6 +6,7 @@ struct HomeView: View {
     @State private var isLoadingQuote = false
     @EnvironmentObject var goalController: GoalController
     @EnvironmentObject var authController: AuthController
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         ScrollView {
@@ -122,6 +123,7 @@ struct HomeView: View {
 struct ProgressBox: View {
     var title: String
     var value: String
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         VStack {
@@ -134,7 +136,10 @@ struct ProgressBox: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(RoundedRectangle(cornerRadius: 15).fill(Color(.systemGray6)))
+        .background(
+            RoundedRectangle(cornerRadius: 15)
+                .fill(colorScheme == .dark ? Color(.systemGray5) : Color(.systemGray6))
+        )
     }
 }
 

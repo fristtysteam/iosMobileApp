@@ -124,17 +124,11 @@ struct AddGoalView: View {
 // MARK: - Preview
 struct AddGoalView_Previews: PreviewProvider {
     static var previews: some View {
-        let dbQueue = DatabaseManager.shared.getDatabase()
-        let goalRepository = GoalRepository(dbQueue: dbQueue)
+        let dbQueue = try! DatabaseQueue()
         let userRepository = UserRepository(dbQueue: dbQueue)
-        let authController = AuthController(userRepository: userRepository)
-        let goalController = GoalController(goalRepository: goalRepository, authController: authController)
-        
-        return VStack {
-            HeaderView(title: "Achievr")
-            AddGoalView(onGoalAdded: { _ in })
-                .environmentObject(goalController)
-                .environmentObject(authController)
-        }
+        let goalRepository = GoalRepository(dbQueue: dbQueue)
+        let authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
+        AddGoalView(onGoalAdded: { _ in })
+            .environmentObject(authController)
     }
 }

@@ -9,10 +9,11 @@ struct IosMobileAppApp: App {
     private let quoteRepository: QuoteRepository
     private let authController: AuthController
     private let goalController: GoalController
+    @StateObject private var themeManager = ThemeManager()
     
     #if DEBUG
     // Development mode will always show ContentView with test data
-    private let isDevelopmentMode = true
+    private let isDevelopmentMode = false
     private let testUserId = UUID()
     @State private var isFirstLaunch = true
     #endif
@@ -23,7 +24,7 @@ struct IosMobileAppApp: App {
         userRepository = UserRepository(dbQueue: dbQueue)
         goalRepository = GoalRepository(dbQueue: dbQueue)
         quoteRepository = QuoteRepository(dbQueue: dbQueue)
-        authController = AuthController(userRepository: userRepository)
+        authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
         goalController = GoalController(goalRepository: goalRepository, authController: authController)
     }
     
@@ -32,9 +33,9 @@ struct IosMobileAppApp: App {
         // Create a test user
         let testUser = User(
             id: testUserId,
-            username: "TestUser",
+            username: "test",
             email: "test@example.com",
-            password: "testpassword123"
+            password: "pass"
         )
         
         // Try to register the test user
@@ -103,6 +104,8 @@ struct IosMobileAppApp: App {
                     .environmentObject(goalRepository)
                     .environmentObject(quoteRepository)
                     .environmentObject(goalController)
+                    .environmentObject(themeManager)
+                    .preferredColorScheme(themeManager.colorScheme)
                     .task {
                         if isFirstLaunch {
                             isFirstLaunch = false
@@ -116,6 +119,8 @@ struct IosMobileAppApp: App {
                     .environmentObject(goalRepository)
                     .environmentObject(quoteRepository)
                     .environmentObject(goalController)
+                    .environmentObject(themeManager)
+                    .preferredColorScheme(themeManager.colorScheme)
             }
             #else
             ContentView()
@@ -124,6 +129,8 @@ struct IosMobileAppApp: App {
                 .environmentObject(goalRepository)
                 .environmentObject(quoteRepository)
                 .environmentObject(goalController)
+                .environmentObject(themeManager)
+                .preferredColorScheme(themeManager.colorScheme)
             #endif
         }
     }
