@@ -41,6 +41,21 @@ struct AuthView: View {
                     RegisterView(switchView: { isLogin.toggle() })
                 }
             }
+            
+            if authController.isLoading {
+                Color.black.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                    .overlay(
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                                .tint(.white)
+                            Text("Logging in...")
+                                .foregroundColor(.white)
+                                .font(.headline)
+                        }
+                    )
+            }
         }
     }
     

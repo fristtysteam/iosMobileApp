@@ -299,6 +299,8 @@ struct GoalDetailsView: View {
                 }
             }
         }
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
     }
     
     private func loadGoal() {

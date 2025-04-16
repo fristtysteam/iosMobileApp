@@ -2,156 +2,225 @@ import SwiftUI
 import Charts
 
 struct AnalyticsView: View {
-    // Sample Goal data
-    private let sampleUserId = UUID()  // Mock user ID for sample data
-    @State private var goals: [Goal] = [
-        Goal(userId: UUID(), title: "Goal A", deadline: dateFrom("2025-03-01"), isCompleted: true),
-        Goal(userId: UUID(), title: "Goal B", deadline: dateFrom("2025-03-01"), isCompleted: true),
-        Goal(userId: UUID(), title: "Goal C", deadline: dateFrom("2025-03-02"), isCompleted: true),
-        Goal(userId: UUID(), title: "Goal D", deadline: dateFrom("2025-03-03"), isCompleted: true),
-        Goal(userId: UUID(), title: "Goal E", deadline: dateFrom("2025-03-03"), isCompleted: true),
-        Goal(userId: UUID(), title: "Goal F", deadline: dateFrom("2025-03-03"), isCompleted: true)
-    ]
-    
-    @State private var streakCount: Int = 3
-    @State private var insights: String = "Very good work and productivity!"
-    
-    var completedGoalsByDate: [CompletedGoalData] {
-        let grouped = Dictionary(grouping: goals.filter { $0.isCompleted && $0.deadline != nil }) {
-            dateFormatter.string(from: $0.deadline!)
-        }
-        return grouped.map { CompletedGoalData(date: $0.key, count: $0.value.count) }
-            .sorted { $0.date < $1.date }
-    }
+    @EnvironmentObject var goalController: GoalController
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    ProgressChartView(completedGoals: completedGoalsByDate)
-                    StreakTrackerView(streakCount: streakCount)
-                    HistoricalDataView(completedGoals: completedGoalsByDate)
-                    InsightsView(insights: insights)
-                }
-                .padding()
-                .navigationTitle("Progress")
-            }
-        }
-    }
-}
-
-struct ProgressChartView: View {
-    var completedGoals: [CompletedGoalData]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Progress Chart")
-                .font(.headline)
-            
-            Chart {
-                ForEach(completedGoals) { goal in
-                    BarMark(
-                        x: .value("Date", goal.date),
-                        y: .value("Goals", goal.count)
+        ScrollView {
+            VStack(spacing: 24) {
+                // Summary Cards
+                HStack(spacing: 16) {
+                    StatCard(
+                        title: "Total Goals",
+                        value: "\(goalController.goals.count)",
+                        icon: "target",
+                        color: .blue
                     )
-                    .foregroundStyle(Color.blue)
+                    
+                    StatCard(
+                        title: "Completed",
+                        value: "\(goalController.goals.filter(\.isCompleted).count)",
+                        icon: "checkmark.circle.fill",
+                        color: .green
+                    )
                 }
-            }
-            .frame(height: 250)
-            .padding(10)
-        }
-    }
-}
-
-
-struct HistoricalDataView: View {
-    var completedGoals: [CompletedGoalData]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Historical Data")
-                .font(.headline)
-            
-            ForEach(completedGoals) { goal in
-                HStack {
-                    Text(goal.date)
-                        .font(.subheadline)
-                    Spacer()
-                    Text("\(goal.count) goals")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-                .padding(.vertical, 5)
                 .padding(.horizontal)
-                .background(Color.white)
-                .cornerRadius(5)
+                
+            
+                CompletionRateView(goals: goalController.goals)
+                    .padding(.horizontal)
+                
+            
+                RecentActivityView(goals: goalController.goals)
+                    .padding(.horizontal)
+                
+                
+                CategoryDistributionView(goals: goalController.goals)
+                    .padding(.horizontal)
+            }
+            .padding(.vertical)
+            .navigationTitle("Analytics")
+        }
+        .background(Color(.systemGroupedBackground))
+        .task {
+            await goalController.loadGoals()
+        }
+    }
+}
+
+// MARK: - Supporting Views
+
+struct StatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(color)
+                Text(title)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            Text(value)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+    }
+}
+
+struct CompletionRateView: View {
+    let goals: [Goal]
+    
+    private var completionRate: Double {
+        guard !goals.isEmpty else { return 0 }
+        return Double(goals.filter(\.isCompleted).count) / Double(goals.count) * 100
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Completion Rate")
+                .font(.headline)
+            
+            HStack(alignment: .bottom, spacing: 8) {
+                Text("\(Int(completionRate))%")
+                    .font(.system(size: 36, weight: .bold))
+                Text("completed")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.secondary.opacity(0.2))
+                        .frame(height: 8)
+                    
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(completionRate >= 70 ? Color.green : completionRate >= 40 ? Color.orange : Color.red)
+                        .frame(width: geometry.size.width * CGFloat(completionRate / 100), height: 8)
+                }
+            }
+            .frame(height: 8)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+    }
+}
+
+struct RecentActivityView: View {
+    let goals: [Goal]
+    
+    private var recentlyCompletedGoals: [Goal] {
+        goals.filter(\.isCompleted)
+            .sorted { ($0.deadline ?? Date()) > ($1.deadline ?? Date()) }
+            .prefix(5)
+            .map { $0 }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Recent Completions")
+                .font(.headline)
+            
+            if recentlyCompletedGoals.isEmpty {
+                Text("No completed goals yet")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else {
+                ForEach(recentlyCompletedGoals) { goal in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(goal.title)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            if let deadline = goal.deadline {
+                                Text(deadline, style: .date)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                    }
+                    .padding(.vertical, 8)
+                    
+                    if goal.id != recentlyCompletedGoals.last?.id {
+                        Divider()
+                    }
+                }
             }
         }
-        .padding(.horizontal)
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
     }
 }
 
-struct StreakTrackerView: View {
-    var streakCount: Int
+struct CategoryDistributionView: View {
+    let goals: [Goal]
+    
+    private var categoryData: [(category: String, count: Int)] {
+        let grouped = Dictionary(grouping: goals, by: { $0.category ?? "Uncategorized" })
+        return grouped.map { ($0.key, $0.value.count) }
+            .sorted { $0.count > $1.count }
+    }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Current Streak")
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Category Distribution")
                 .font(.headline)
             
-            Text("You have completed goals for \(streakCount) consecutive days!")
-                .font(.subheadline)
-                .foregroundColor(.green)
-                .padding()
-                .background(Color.green.opacity(0.1))
-                .cornerRadius(5)
+            if goals.isEmpty {
+                Text("No goals yet")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else {
+                Chart {
+                    ForEach(categoryData, id: \.category) { item in
+                        SectorMark(
+                            angle: .value("Count", item.count),
+                            innerRadius: .ratio(0.618),
+                            angularInset: 1.5
+                        )
+                        .foregroundStyle(by: .value("Category", item.category))
+                    }
+                }
+                .frame(height: 200)
+                
+                // Legend
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(categoryData, id: \.category) { item in
+                        HStack {
+                            Text(item.category)
+                                .font(.subheadline)
+                            Spacer()
+                            Text("\(item.count)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
         }
-        .padding(.horizontal)
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
     }
-}
-
-// MARK: - Insights View
-struct InsightsView: View {
-    var insights: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Insights on Productivity")
-                .font(.headline)
-            
-            Text(insights)
-                .font(.subheadline)
-                .padding(10)
-                .background(Color.white)
-                .cornerRadius(5)
-                .shadow(radius: 2)
-        }
-        .padding(.horizontal)
-    }
-}
-
-
-#Preview {
-    HeaderView(title: "Achievr")
-
-    AnalyticsView()
-}
-
-
-
-struct CompletedGoalData: Identifiable {
-    var id: String { date }
-    var date: String
-    var count: Int
-}
-
-
-private let dateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd"
-    return formatter
-}()
-
-private func dateFrom(_ string: String) -> Date? {
-    dateFormatter.date(from: string)
 }
