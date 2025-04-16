@@ -2,6 +2,8 @@ import SwiftUI
 
 struct BottomBarView: View {
     @Binding var currentTab: Int
+    @EnvironmentObject var authController: AuthController
+    @State private var showLogoutAlert = false
     
     var body: some View {
         HStack(alignment: .center, spacing: 0) {
@@ -32,7 +34,9 @@ struct BottomBarView: View {
             Menu {
                 Button("Settings", action: {})
                 Button("Help", action: {})
-                Button("Logout", action: {})
+                Button("Logout", role: .destructive) {
+                    showLogoutAlert = true
+                }
             } label: {
                 VStack(spacing: 4) {
                     Image(systemName: "ellipsis.circle")
@@ -48,6 +52,14 @@ struct BottomBarView: View {
         .frame(height: 70)
         .background(Color(.systemBackground).ignoresSafeArea(edges: .bottom))
         .shadow(radius: 3)
+        .alert("Logout", isPresented: $showLogoutAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Logout", role: .destructive) {
+                authController.logout()
+            }
+        } message: {
+            Text("Are you sure you want to logout?")
+        }
     }
 }
 

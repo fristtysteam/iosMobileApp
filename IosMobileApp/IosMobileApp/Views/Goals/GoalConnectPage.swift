@@ -11,20 +11,12 @@ struct GoalConnectPage: View {
     var body: some View {
         VStack(spacing: 0) {
             // Custom Header
-            HeaderView(title: "Achievr")
+            HeaderView(title: "Goal Connect", useGradient: true)
 
             ScrollView {
                 VStack(spacing: 28) {
                     // Page Heading
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Goal Connect")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .foregroundStyle(LinearGradient(
-                                colors: [.blue, .indigo],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ))
-                            .shadow(color: .blue.opacity(0.1), radius: 5, x: 0, y: 2)
 
                         Text("Design your personal growth journey")
                             .font(.subheadline)

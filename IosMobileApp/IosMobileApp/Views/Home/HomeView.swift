@@ -5,13 +5,14 @@ struct HomeView: View {
     @State private var quote: Quote? = nil
     @State private var isLoadingQuote = false
     @EnvironmentObject var goalController: GoalController
+    @EnvironmentObject var authController: AuthController
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                HeaderView(title: "Achievr")
+                HeaderView(title: "Achievr", useGradient: true)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("👋 Hello, Achiever!")
+                    Text("Welcome back, \(authController.currentUser?.username ?? "User")! 👋")
                         .font(.largeTitle.bold())
                     Text(Date(), style: .date)
                         .font(.subheadline)
@@ -43,11 +44,13 @@ struct HomeView: View {
                         .font(.title2.bold())
 
                     CustomPagingSlider(data: $goals) { goal in
-                        GoalCardView(title: goal.wrappedValue.title,
+                        NavigationLink(destination: GoalDetailsView(goalID: goal.wrappedValue.id)) {
+                            GoalCardView(title: goal.wrappedValue.title,
                                      description: goal.wrappedValue.description,
                                      progress: goal.wrappedValue.progress,
                                      category: goal.wrappedValue.category,
                                      deadline: goal.wrappedValue.deadline)
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -73,7 +76,7 @@ struct HomeView: View {
                                 .foregroundColor(.blue)
 
                             VStack(alignment: .leading) {
-                                Text("“\(quote.quote)”")
+                                Text("\"\(quote.quote)\"")
                                     .font(.body)
                                     .italic()
                                     .foregroundColor(.white)

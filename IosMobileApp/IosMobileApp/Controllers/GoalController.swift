@@ -9,9 +9,11 @@ class GoalController: ObservableObject {
     @Published var showError = false
     
     private let goalRepository: GoalRepository
+    private let authController: AuthController
     
-    init(goalRepository: GoalRepository) {
+    init(goalRepository: GoalRepository, authController: AuthController) {
         self.goalRepository = goalRepository
+        self.authController = authController
     }
     
     func loadGoals() async {
@@ -30,7 +32,14 @@ class GoalController: ObservableObject {
     func createGoal(title: String, description: String?, category: String?, deadline: Date?, progress: Double, isCompleted: Bool) async -> UUID? {
         isLoading = true
         do {
+            guard let currentUserId = authController.currentUser?.id else {
+                errorMessage = "No user logged in"
+                showError = true
+                return nil
+            }
+            
             let newGoal = Goal(
+                userId: currentUserId,
                 title: title,
                 description: description,
                 category: category,

@@ -3,13 +3,14 @@ import Charts
 
 struct AnalyticsView: View {
     // Sample Goal data
+    private let sampleUserId = UUID()  // Mock user ID for sample data
     @State private var goals: [Goal] = [
-        Goal(title: "Goal A", deadline: dateFrom("2025-03-01"), isCompleted: true),
-        Goal(title: "Goal B", deadline: dateFrom("2025-03-01"), isCompleted: true),
-        Goal(title: "Goal C", deadline: dateFrom("2025-03-02"), isCompleted: true),
-        Goal(title: "Goal D", deadline: dateFrom("2025-03-03"), isCompleted: true),
-        Goal(title: "Goal E", deadline: dateFrom("2025-03-03"), isCompleted: true),
-        Goal(title: "Goal F", deadline: dateFrom("2025-03-03"), isCompleted: true)
+        Goal(userId: UUID(), title: "Goal A", deadline: dateFrom("2025-03-01"), isCompleted: true),
+        Goal(userId: UUID(), title: "Goal B", deadline: dateFrom("2025-03-01"), isCompleted: true),
+        Goal(userId: UUID(), title: "Goal C", deadline: dateFrom("2025-03-02"), isCompleted: true),
+        Goal(userId: UUID(), title: "Goal D", deadline: dateFrom("2025-03-03"), isCompleted: true),
+        Goal(userId: UUID(), title: "Goal E", deadline: dateFrom("2025-03-03"), isCompleted: true),
+        Goal(userId: UUID(), title: "Goal F", deadline: dateFrom("2025-03-03"), isCompleted: true)
     ]
     
     @State private var streakCount: Int = 3

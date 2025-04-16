@@ -4,6 +4,9 @@ import GRDB
 final class DatabaseManager {
     static let shared = DatabaseManager()
     private var dbQueue: DatabaseQueue?
+    
+    // Set this to true to preserve database between app launches
+    static let isDevelopment = true
 
     private init() {
         do {
@@ -11,8 +14,10 @@ final class DatabaseManager {
             let databaseURL = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
                 .appendingPathComponent("appDatabase.sqlite")
 
-            // Optional: Delete the old DB during development if needed
-            // try? FileManager.default.removeItem(at: databaseURL)
+            // Only delete the database if not in development mode
+            if !DatabaseManager.isDevelopment {
+                try? FileManager.default.removeItem(at: databaseURL)
+            }
 
             // Database configuration and debugging SQL traces
             var configuration = Configuration()
@@ -37,7 +42,7 @@ final class DatabaseManager {
             // User table
             try db.create(table: "user", ifNotExists: true) { t in
                 t.column("id", .text).primaryKey()
-                t.column("username", .text).notNull()
+                t.column("username", .text).notNull().unique()
                 t.column("email", .text).notNull()
                 t.column("password", .text).notNull()
             }
@@ -45,14 +50,15 @@ final class DatabaseManager {
             // Goal table
             try db.create(table: "goal", ifNotExists: true) { t in
                 t.column("id", .text).primaryKey()
-                t.column("userId", .text).references("user", onDelete: .cascade)
                 t.column("title", .text).notNull()
                 t.column("description", .text)
                 t.column("category", .text)
-                t.column("deadline", .datetime)
-                t.column("progress", .double).notNull().defaults(to: 0.0)
+                t.column("deadline", .date)
                 t.column("isCompleted", .boolean).notNull().defaults(to: false)
-                t.column("progressDiary", .blob).notNull() // Store progress as JSON
+                t.column("progress", .double).notNull().defaults(to: 0)
+                t.column("userId", .text).notNull()
+                t.column("progressDiary", .blob)  // Store progress diary as JSON blob
+                t.foreignKey(["userId"], references: "user", onDelete: .cascade)
             }
 
             // Quote table
@@ -72,6 +78,64 @@ final class DatabaseManager {
 
         guard userCount == 0 else { return }
 
+        // Create a test user
+        let testUser = User(
+            id: UUID(),
+            username: "testuser",
+            email: "test@example.com",
+            password: "password",
+            goals: []
+        )
+        
+        // Insert test user
+        try dbQueue?.write { db in
+            try testUser.insert(db)
+            print("✅ Created test user: \(testUser.username)")
+            
+            // Create sample goals for the test user
+            let sampleGoals = [
+                Goal(
+                    id: UUID(),
+                    userId: testUser.id,
+                    title: "Learn SwiftUI",
+                    description: "Master SwiftUI framework for iOS development",
+                    category: "Learning",
+                    deadline: Calendar.current.date(byAdding: .month, value: 3, to: Date()),
+                    progress: 0.3,
+                    isCompleted: false,
+                    progressDiary: ["Started with basic UI components", "Completed navigation tutorial"]
+                ),
+                Goal(
+                    id: UUID(),
+                    userId: testUser.id,
+                    title: "Exercise Routine",
+                    description: "Maintain a consistent workout schedule",
+                    category: "Health",
+                    deadline: Calendar.current.date(byAdding: .month, value: 1, to: Date()),
+                    progress: 0.6,
+                    isCompleted: false,
+                    progressDiary: ["Started morning runs", "Added strength training"]
+                ),
+                Goal(
+                    id: UUID(),
+                    userId: testUser.id,
+                    title: "Read 12 Books",
+                    description: "Read one book per month for personal growth",
+                    category: "Personal",
+                    deadline: Calendar.current.date(byAdding: .year, value: 1, to: Date()),
+                    progress: 0.25,
+                    isCompleted: false,
+                    progressDiary: ["Finished 'Atomic Habits'", "Started 'Deep Work'"]
+                )
+            ]
+            
+            // Insert sample goals
+            for goal in sampleGoals {
+                try goal.insert(db)
+            }
+            print("✅ Created \(sampleGoals.count) sample goals for test user")
+        }
+
         // Seed with some sample quotes
         let sampleQuotes = [
             Quote(quote: "The journey of a thousand miles begins with one step.", author: "Lao Tzu", html: ""),
@@ -84,6 +148,7 @@ final class DatabaseManager {
             for quote in sampleQuotes {
                 try quote.insert(db)
             }
+            print("✅ Seeded \(sampleQuotes.count) quotes")
         }
     }
 

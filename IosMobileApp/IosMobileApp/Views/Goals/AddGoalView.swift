@@ -14,6 +14,7 @@ struct AddGoalView: View {
     @State private var progress: Double = 0.0
     @State private var isCompleted: Bool = false
     @State private var showToast = false
+    @State private var showCategorySheet = false
     
     var body: some View {
         NavigationView {
@@ -27,9 +28,18 @@ struct AddGoalView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding(.vertical, 8)
 
-                    TextField("Category", text: $category)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.vertical, 8)
+                    Button(action: {
+                        showCategorySheet = true
+                    }) {
+                        HStack {
+                            Text(category.isEmpty ? "Select Category" : category)
+                                .foregroundColor(category.isEmpty ? .gray : .primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding(.vertical, 8)
                 }
                 
                 Section(header: Text("Goal Settings").font(.headline).foregroundColor(.blue)) {
@@ -80,20 +90,16 @@ struct AddGoalView: View {
                     isShowing: $showToast
                 )
             )
+            .sheet(isPresented: $showCategorySheet) {
+                CategorySelectionView(selectedCategory: $category)
+                    .presentationDetents([.large])
+                  
+            }
         }
         .accentColor(.blue)
     }
     
     private func saveGoal() async {
-        let newGoal = Goal(
-            title: title,
-            description: description.isEmpty ? nil : description,
-            category: category.isEmpty ? nil : category,
-            deadline: deadline,
-            progress: progress,
-            isCompleted: isCompleted
-        )
-        
         if let createdGoalID = await goalController.createGoal(
             title: title,
             description: description.isEmpty ? nil : description,
@@ -119,13 +125,16 @@ struct AddGoalView: View {
 struct AddGoalView_Previews: PreviewProvider {
     static var previews: some View {
         let dbQueue = DatabaseManager.shared.getDatabase()
-        let repository = GoalRepository(dbQueue: dbQueue)
-        let controller = GoalController(goalRepository: repository)
+        let goalRepository = GoalRepository(dbQueue: dbQueue)
+        let userRepository = UserRepository(dbQueue: dbQueue)
+        let authController = AuthController(userRepository: userRepository)
+        let goalController = GoalController(goalRepository: goalRepository, authController: authController)
         
         return VStack {
             HeaderView(title: "Achievr")
             AddGoalView(onGoalAdded: { _ in })
-                .environmentObject(controller)
+                .environmentObject(goalController)
+                .environmentObject(authController)
         }
     }
 }

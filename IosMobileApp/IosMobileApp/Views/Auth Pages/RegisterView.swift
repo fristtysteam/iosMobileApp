@@ -3,8 +3,8 @@ import SwiftUI
 
 // Enhanced Registration View with error handling
 struct RegisterView: View {
-    @EnvironmentObject var userController: UserController
-        var switchView: () -> Void
+    @EnvironmentObject var authController: AuthController
+    var switchView: () -> Void
 
     var body: some View {
         VStack {
@@ -14,7 +14,7 @@ struct RegisterView: View {
                 .frame(width: 100, height: 100)
                 .padding(.top, 40)
 
-            if userController.registrationSuccess {
+            if authController.registrationSuccess {
                 // Success state view
                 VStack(spacing: 20) {
                     Image(systemName: "checkmark.circle.fill")
@@ -33,7 +33,7 @@ struct RegisterView: View {
                     
                     Button(action: {
                         // Simply mark user as authenticated in controller
-                        userController.setAuthenticated()
+                        authController.setAuthenticated()
                     }) {
                         Text("Continue")
                             .fontWeight(.bold)
@@ -48,45 +48,52 @@ struct RegisterView: View {
                 .padding()
             } else {
                 // Registration form
-                TextField("Username", text: $userController.username)
+                TextField("Username", text: $authController.username)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
-                            .stroke(userController.isUsernameValid ? Color.clear : Color.red, lineWidth: 1)
+                            .stroke(authController.isUsernameValid ? Color.clear : Color.red, lineWidth: 1)
                     )
                 
-                TextField("Email", text: $userController.email)
+                TextField("Email", text: $authController.email)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
-                            .stroke(userController.isEmailValid ? Color.clear : Color.red, lineWidth: 1)
+                            .stroke(authController.isEmailValid ? Color.clear : Color.red, lineWidth: 1)
                     )
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
                 
-                SecureField("Password", text: $userController.password)
+                SecureField("Password", text: $authController.password)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
-                            .stroke(userController.isPasswordValid ? Color.clear : Color.red, lineWidth: 1)
+                            .stroke(authController.isPasswordValid ? Color.clear : Color.red, lineWidth: 1)
                     )
                 
                 Button(action: {
-                    userController.registerUser()
-                    // Note: Registration success is handled by observing registrationSuccess
+                    Task {
+                        await authController.registerUser()
+                    }
                 }) {
-                    Text("Register")
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                    if authController.isLoading {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Text("Register")
+                            .fontWeight(.bold)
+                    }
                 }
+                .frame(maxWidth: .infinity)
                 .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .padding()
+                .disabled(authController.isLoading)
 
                 Button(action: switchView) {
                     Text("Login")
@@ -101,15 +108,15 @@ struct RegisterView: View {
             }
         }
         .onAppear {
-            userController.registrationSuccess = false
+            authController.registrationSuccess = false
         }
         .overlay(
             ToastView(
-                message: userController.errorMessage ?? "",
+                message: authController.errorMessage ?? "",
                 type: .error,
                 isShowing: .init(
-                    get: { userController.showError },
-                    set: { userController.showError = $0 }
+                    get: { authController.showError },
+                    set: { authController.showError = $0 }
                 )
             )
         )

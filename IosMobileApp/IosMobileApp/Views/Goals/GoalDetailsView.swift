@@ -134,14 +134,20 @@ struct GoalDetailsView: View {
                     .foregroundColor(.blue)
                 
                 Circle()
-                    .trim(from: 0.0, to: CGFloat(goal.progress))
-                    .stroke(style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round))
-                    .foregroundColor(.blue)
+                    .trim(from: 0.0, to: CGFloat(editedProgress))
+                    .stroke(
+                        LinearGradient(
+                            colors: [.blue, .purple],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round)
+                    )
                     .rotationEffect(Angle(degrees: 270.0))
-                    .animation(.linear, value: goal.progress)
+                    .animation(.linear, value: editedProgress)
                 
                 VStack {
-                    Text("\(Int(goal.progress * 100))%")
+                    Text("\(Int(editedProgress * 100))%")
                         .font(.title)
                         .fontWeight(.bold)
                     Text("Complete")
@@ -154,12 +160,19 @@ struct GoalDetailsView: View {
             // Progress Slider
             VStack(spacing: 8) {
                 Slider(value: $editedProgress, in: 0...1, step: 0.01)
-                    .tint(.blue)
+                    .tint(
+                        LinearGradient(
+                            colors: [.blue, .purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                 
                 Button("Update Progress") {
                     updateProgress()
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.blue)
                 .disabled(editedProgress == goal.progress)
             }
         }

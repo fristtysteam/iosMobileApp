@@ -3,11 +3,11 @@ import Combine
 
 
 
-// All UI updates must happen on the main thread. Since UserController drives the state of UI through @Published properties
+// All UI updates must happen on the main thread. Since AuthController drives the state of UI through @Published properties
 // (like isAuthenticated, username, showError), it's
 // important those updates happen on the main thread thats why use MainActor
 @MainActor
-class UserController: ObservableObject {
+class AuthController: ObservableObject {
     @Published var username: String = ""
     @Published var password: String = ""
     @Published var email: String = ""
@@ -28,8 +28,14 @@ class UserController: ObservableObject {
     @Published var isEmailValid: Bool = true
     @Published var isLoading = false
     
-    init() {
-        loadUsers()
+    private(set) var currentUser: User?
+    private let userRepository: UserRepository
+    
+    init(userRepository: UserRepository) {
+        self.userRepository = userRepository
+        Task {
+            await loadUsers()
+        }
     }
     
   
@@ -43,66 +49,65 @@ class UserController: ObservableObject {
 
     
   
-    func loadUsers() {
-        if let data = UserDefaults.standard.data(forKey: "registeredUsers") {
-            if let decodedUsers = try? JSONDecoder().decode([User].self, from: data) {
-                self.users = decodedUsers
-                print("Loaded \(users.count) users")
-            }
+    func loadUsers() async {
+        do {
+            self.users = try await userRepository.getAllUsers()
+            print("Loaded \(users.count) users from database")
+        } catch {
+            print("Failed to load users: \(error)")
         }
     }
     
  
-    func saveUsers() {
-        if let encoded = try? JSONEncoder().encode(users) {
-            UserDefaults.standard.set(encoded, forKey: "registeredUsers")
-            print("Saved \(users.count) users")
-        }
-    }
-    
-  
-    func registerUser() -> Bool {
-        // Validate first
-        if !validateRegistration() {
-            return false
-        }
-        
-        // Check if username already exists
-        if users.contains(where: { $0.username == username }) {
-            errorMessage = "Username already taken"
-            showError = true
-            return false
-        }
-        
-        // Create and save new user
-        let newUser = User(username: username, email: email, password: password)
-        users.append(newUser)
-        saveUsers()
-        
-        // Set success flag
-        registrationSuccess = true
-        return true
-    }
-    
-    // Authenticate user
-    func loginUser() -> Bool {
-        guard !isLoading else { return false }
-        
+    func registerUser() async {
+        guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         
-  
-        if !validateLogin() {
-            return false
+        // Validate first
+        if !validateRegistration() {
+            return
         }
-
-        if let _ = users.first(where: { $0.username == username && $0.password == password }) {
+        
+        do {
+            let user = try await userRepository.register(
+                username: username,
+                email: email,
+                password: password
+            )
+            
+            // Clear form and set success
+            loadUserDetails()
+            registrationSuccess = true
             isAuthenticated = true
-            return true
-        } else {
+            currentUser = user
+            await loadUsers() // Refresh users list
+            
+        } catch AuthError.usernameTaken {
+            errorMessage = "Username already taken"
+            showError = true
+        } catch {
+            errorMessage = "Registration failed"
+            showError = true
+        }
+    }
+    
+    func loginUser() async {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        
+        if !validateLogin() {
+            return
+        }
+        
+        do {
+            let user = try await userRepository.login(username: username, password: password)
+            currentUser = user
+            isAuthenticated = true
+        } catch {
             errorMessage = "Invalid username or password"
             showError = true
-            return false
         }
     }
 
@@ -116,15 +121,24 @@ class UserController: ObservableObject {
     }
     
     // Wipe all user data
-    func wipeAllData() {
-        users = []
-        saveUsers()
-        UserDefaults.standard.removeObject(forKey: "registeredUsers")
-        print("All user data wiped")
+    func wipeAllData() async {
+        do {
+            // Delete all users from database
+            try await userRepository.deleteAllUsers()
+            
+            // Clear local state
+            users = []
+            currentUser = nil
+            isAuthenticated = false
+            loadUserDetails()
+        } catch {
+            errorMessage = "Failed to wipe user data: \(error.localizedDescription)"
+            showError = true
+        }
     }
     
     // Validate login credentials
-    func validateLogin() -> Bool {
+    private func validateLogin() -> Bool {
         // Reset validation states
         isUsernameValid = !username.isEmpty
         isPasswordValid = !password.isEmpty
@@ -140,7 +154,7 @@ class UserController: ObservableObject {
     }
     
     // Validation of registration data
-    func validateRegistration() -> Bool {
+    private func validateRegistration() -> Bool {
         // Reset validation states
         isUsernameValid = !username.isEmpty
         isPasswordValid = password.count >= 6
@@ -173,5 +187,67 @@ class UserController: ObservableObject {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: email)
+    }
+
+    // Profile update
+    func updateProfile(newUsername: String, newEmail: String, currentPassword: String, newPassword: String?) async throws {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        
+        guard let userId = currentUser?.id else {
+            errorMessage = "No user logged in"
+            showError = true
+            throw AuthError.noUserLoggedIn
+        }
+        
+        do {
+            // Verify current password
+            guard try await userRepository.verifyPassword(userId: userId, password: currentPassword) else {
+                errorMessage = "Current password is incorrect"
+                showError = true
+                throw AuthError.invalidCredentials
+            }
+            
+            // Update profile
+            try await userRepository.updateUser(
+                userId: userId,
+                username: newUsername,
+                email: newEmail,
+                newPassword: newPassword
+            )
+            
+            // Update local state
+            self.username = newUsername
+            self.email = newEmail
+            if let newPassword = newPassword {
+                self.password = newPassword
+            }
+            
+            // Update current user
+            currentUser?.username = newUsername
+            currentUser?.email = newEmail
+            
+        } catch AuthError.usernameTaken {
+            errorMessage = "Username already taken"
+            showError = true
+            throw AuthError.usernameTaken
+        } catch {
+            errorMessage = "Failed to update profile"
+            showError = true
+            throw error
+        }
+    }
+
+    // Logout user
+    func logout() {
+        // Clear user data
+        currentUser = nil
+        username = ""
+        password = ""
+        email = ""
+        isAuthenticated = false
+        showError = false
+        registrationSuccess = false
     }
 }

@@ -5,15 +5,16 @@
 //  Created by Student on 14/04/2025.
 //
 import SwiftUI
+import GRDB
 
 struct UsersListView: View {
-    @ObservedObject var userController: UserController
+    @EnvironmentObject var authController: AuthController
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         NavigationView {
             List {
-                ForEach(userController.users) { user in
+                ForEach(authController.users) { user in
                     VStack(alignment: .leading) {
                         Text(user.username)
                             .font(.headline)
@@ -28,5 +29,15 @@ struct UsersListView: View {
                 presentationMode.wrappedValue.dismiss()
             })
         }
+    }
+}
+
+struct UsersListView_Previews: PreviewProvider {
+    static var previews: some View {
+        let dbQueue = try! DatabaseQueue()
+        let userRepository = UserRepository(dbQueue: dbQueue)
+        let authController = AuthController(userRepository: userRepository)
+        UsersListView()
+            .environmentObject(authController)
     }
 }

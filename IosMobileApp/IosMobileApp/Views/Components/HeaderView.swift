@@ -2,28 +2,33 @@ import SwiftUI
 
 struct HeaderView: View {
     let title: String
+    let useGradient: Bool
+    
+    init(title: String, useGradient: Bool = false) {
+        self.title = title
+        self.useGradient = useGradient
+    }
 
     var body: some View {
         HStack {
-            // Profile Icon with NavigationLink to ProfileView
-            NavigationLink(destination: ProfileSettingsView()) {
-                Circle()
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(Color.blue)
-                    .overlay(
-                        Image(systemName: "person.fill")
-                            .foregroundColor(.white)
-                            .font(.title)
+            // Title with optional gradient
+            if useGradient {
+                Text(title)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.blue, .purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
+            } else {
+                Text(title)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
             }
-
-            Spacer()
-
-            // Title
-            Text(self.title)
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundColor(Color.blue)
 
             Spacer()
 
@@ -37,10 +42,13 @@ struct HeaderView: View {
         }
         .padding()
         .shadow(radius: 10)
-        .frame(maxWidth: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
 #Preview {
-    HeaderView(title: "goal getter")
+    VStack(spacing: 20) {
+        HeaderView(title: "Achievr")
+        HeaderView(title: "Goal Connect", useGradient: true)
+    }
 }
