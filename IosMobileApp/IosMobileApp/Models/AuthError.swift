@@ -6,6 +6,8 @@ enum AuthError: LocalizedError {
     case emailTaken
     case networkError
     case noUserLoggedIn
+    case invalidPassword
+    case userNotFound
     case unknown
     
     var errorDescription: String? {
@@ -20,6 +22,10 @@ enum AuthError: LocalizedError {
             return "Network error. Please check your connection and try again."
         case .noUserLoggedIn:
             return "No user is currently logged in."
+        case .invalidPassword:
+            return "The current password is incorrect."
+        case .userNotFound:
+            return "User not found."
         case .unknown:
             return "An unknown error occurred. Please try again."
         }

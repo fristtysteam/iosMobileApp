@@ -99,35 +99,124 @@ class UserRepository: ObservableObject {
         }
     }
     
-    func updateUser(userId: UUID, username: String, email: String, newPassword: String?) async throws {
-        try await database.write { db in
+    func updateUser(
+        userID: UUID,
+        newUsername: String,
+        newEmail: String,
+        currentPassword: String,
+        newPassword: String? = nil,
+        profilePictureData: Data? = nil
+    ) async throws -> User {
+        return try await database.write { db in
             // Check if username is taken by another user
-            if try User.filter(Column("username") == username)
-                .filter(Column("id") != userId.uuidString)
+            if try User.filter(Column("username") == newUsername)
+                .filter(Column("id") != userID.uuidString)
                 .fetchCount(db) > 0 {
                 throw AuthError.usernameTaken
             }
             
             // Get current user
-            guard let currentUser = try User.fetchOne(db, key: userId.uuidString) else {
-                throw AuthError.invalidCredentials
+            guard let currentUser = try User.fetchOne(db, key: userID.uuidString) else {
+                throw AuthError.userNotFound
             }
             
-            // Update user
+            // Verify current password
+            guard currentUser.password == currentPassword else {
+                throw AuthError.invalidPassword
+            }
+            
+            // Create updated user object
             var updatedUser = User(
-                id: userId,
-                username: username,
-                email: email,
-                password: newPassword ?? currentUser.password
+                id: userID,
+                username: newUsername,
+                email: newEmail,
+                password: newPassword ?? currentUser.password,
+                goals: currentUser.goals,
+                profilePictureData: profilePictureData ?? currentUser.profilePictureData
             )
             
+            // Update the user in the database
             try updatedUser.update(db)
+            
+            // Return the updated user
+            return updatedUser
+        }
+    }
+    
+    // Add a dedicated method for updating profile picture only
+    func updateProfilePicture(userID: UUID, profilePictureData: Data?) async throws -> User {
+        return try await database.write { db in
+            // Get current user
+            guard let currentUser = try User.fetchOne(db, key: userID.uuidString) else {
+                throw AuthError.userNotFound
+            }
+            
+            // Create updated user object with just the profile picture changed
+            var updatedUser = User(
+                id: userID,
+                username: currentUser.username,
+                email: currentUser.email,
+                password: currentUser.password,
+                goals: currentUser.goals,
+                profilePictureData: profilePictureData
+            )
+            
+            // Update the user in the database
+            try updatedUser.update(db)
+            
+            // Return the updated user
+            return updatedUser
+        }
+    }
+    
+    // Add method to update profile info without password verification
+    func updateProfileInfo(
+        userID: UUID,
+        newUsername: String,
+        newEmail: String,
+        profilePictureData: Data?
+    ) async throws -> User {
+        return try await database.write { db in
+            // Check if username is taken by another user
+            if try User.filter(Column("username") == newUsername)
+                .filter(Column("id") != userID.uuidString)
+                .fetchCount(db) > 0 {
+                throw AuthError.usernameTaken
+            }
+            
+            // Get current user
+            guard let currentUser = try User.fetchOne(db, key: userID.uuidString) else {
+                throw AuthError.userNotFound
+            }
+            
+            // Create updated user object
+            var updatedUser = User(
+                id: userID,
+                username: newUsername,
+                email: newEmail,
+                password: currentUser.password, // Keep the existing password
+                goals: currentUser.goals,
+                profilePictureData: profilePictureData ?? currentUser.profilePictureData
+            )
+            
+            // Update the user in the database
+            try updatedUser.update(db)
+            
+            // Return the updated user
+            return updatedUser
         }
     }
     
     func deleteAllUsers() async throws {
         try await database.write { db in
             try User.deleteAll(db)
+        }
+    }
+    
+    // Add method to get user by ID
+    func getUserById(_ userId: UUID) async throws -> User? {
+        return try await database.read { db in
+            try User.fetchOne(db, key: userId.uuidString)
         }
     }
 } 

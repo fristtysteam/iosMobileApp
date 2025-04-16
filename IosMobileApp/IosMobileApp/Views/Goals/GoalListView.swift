@@ -5,7 +5,7 @@ struct GoalListView: View {
     @State private var searchText = ""
     @State private var selectedFilter: GoalFilter = .all
     @State private var showingSortOptions = false
-    @State private var sortOrder: GoalSortOrder = .dateCreated
+    @State private var sortOrder: GoalSortOrder = .dateNewestFirst
     @State private var showingClearConfirmation = false
     @State private var showToast = false
     @State private var toastMessage = ""
@@ -30,17 +30,23 @@ struct GoalListView: View {
         case .completed:
             goals = goals.filter { $0.isCompleted }
         case .inProgress:
-            goals = goals.filter { !$0.isCompleted }
+            goals = goals.filter { !$0.isCompleted && $0.progress > 0 }  // Show goals that are started but not completed
+        case .notStarted:
+            goals = goals.filter { !$0.isCompleted && $0.progress == 0 }  // Show goals that haven't been started
         }
         
         // Apply sorting
         switch sortOrder {
-        case .dateCreated:
-            goals.sort { $0.deadline ?? Date.distantFuture < $1.deadline ?? Date.distantFuture }
+        case .dateNewestFirst:
+            goals.sort { ($0.deadline ?? Date.distantFuture) > ($1.deadline ?? Date.distantFuture) }
+        case .dateOldestFirst:
+            goals.sort { ($0.deadline ?? Date.distantFuture) < ($1.deadline ?? Date.distantFuture) }
         case .title:
             goals.sort { $0.title < $1.title }
-        case .progress:
+        case .progressHighToLow:
             goals.sort { $0.progress > $1.progress }
+        case .progressLowToHigh:
+            goals.sort { $0.progress < $1.progress }
         }
         
         return goals
@@ -117,9 +123,11 @@ struct GoalListView: View {
             ActionSheet(
                 title: Text("Sort Goals"),
                 buttons: [
-                    .default(Text("By Date")) { sortOrder = .dateCreated },
-                    .default(Text("By Title")) { sortOrder = .title },
-                    .default(Text("By Progress")) { sortOrder = .progress },
+                    .default(Text(GoalSortOrder.dateNewestFirst.displayName)) { sortOrder = .dateNewestFirst },
+                    .default(Text(GoalSortOrder.dateOldestFirst.displayName)) { sortOrder = .dateOldestFirst },
+                    .default(Text(GoalSortOrder.title.displayName)) { sortOrder = .title },
+                    .default(Text(GoalSortOrder.progressHighToLow.displayName)) { sortOrder = .progressHighToLow },
+                    .default(Text(GoalSortOrder.progressLowToHigh.displayName)) { sortOrder = .progressLowToHigh },
                     .cancel()
                 ]
             )
@@ -174,16 +182,50 @@ struct GoalListView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.gray)
             
-            Text(searchText.isEmpty ? "No goals yet" : "No matching goals")
+            Text(getEmptyStateHeadline())
                 .font(.headline)
             
-            Text(searchText.isEmpty ? "Create your first goal to get started!" : "Try adjusting your search or filters")
+            Text(getEmptyStateSubheadline())
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
+    }
+    
+    private func getEmptyStateHeadline() -> String {
+        if !searchText.isEmpty {
+            return "No matching goals"
+        }
+        
+        switch selectedFilter {
+        case .all:
+            return "No goals yet"
+        case .completed:
+            return "No completed goals"
+        case .inProgress:
+            return "No goals in progress"
+        case .notStarted:
+            return "No goals to start"
+        }
+    }
+    
+    private func getEmptyStateSubheadline() -> String {
+        if !searchText.isEmpty {
+            return "Try adjusting your search or filters"
+        }
+        
+        switch selectedFilter {
+        case .all:
+            return "Create your first goal to get started!"
+        case .completed:
+            return "Complete a goal to see it here"
+        case .inProgress:
+            return "Update progress on a goal to see it here"
+        case .notStarted:
+            return "Create a new goal to get started"
+        }
     }
 }
 
@@ -250,17 +292,32 @@ struct FilterPill: View {
 }
 
 enum GoalFilter: CaseIterable {
-    case all, completed, inProgress
+    case all, completed, inProgress, notStarted
     
     var title: String {
         switch self {
         case .all: return "All"
         case .completed: return "Completed"
         case .inProgress: return "In Progress"
+        case .notStarted: return "Not Started"
         }
     }
 }
 
 enum GoalSortOrder {
-    case dateCreated, title, progress
+    case dateNewestFirst
+    case dateOldestFirst
+    case title
+    case progressHighToLow
+    case progressLowToHigh
+    
+    var displayName: String {
+        switch self {
+        case .dateNewestFirst: return "Newest First"
+        case .dateOldestFirst: return "Oldest First"
+        case .title: return "By Title"
+        case .progressHighToLow: return "Most Progress First"
+        case .progressLowToHigh: return "Least Progress First"
+        }
+    }
 }

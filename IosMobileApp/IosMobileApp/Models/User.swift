@@ -7,13 +7,15 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
     var email: String
     var password: String
     var goals: [Goal] = [] 
+    var profilePictureData: Data?
     
-    init(id: UUID = UUID(), username: String, email: String, password: String, goals: [Goal] = []) {
+    init(id: UUID = UUID(), username: String, email: String, password: String, goals: [Goal] = [], profilePictureData: Data? = nil) {
         self.id = id
         self.username = username
         self.email = email
         self.password = password
         self.goals = goals
+        self.profilePictureData = profilePictureData
     }
     
     // Database column names
@@ -22,6 +24,7 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
         static let username = Column(CodingKeys.username)
         static let email = Column(CodingKeys.email)
         static let password = Column(CodingKeys.password)
+        static let profilePictureData = Column(CodingKeys.profilePictureData)
     }
     
     func encode(to container: inout PersistenceContainer) {
@@ -29,6 +32,7 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
         container["username"] = username
         container["email"] = email
         container["password"] = password
+        container["profilePictureData"] = profilePictureData
     }
     
     init(row: Row) throws {
@@ -36,5 +40,6 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
         username = row["username"]
         email = row["email"]
         password = row["password"]
+        profilePictureData = row["profilePictureData"] as? Data
     }
 }

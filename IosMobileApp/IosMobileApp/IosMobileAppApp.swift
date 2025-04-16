@@ -9,6 +9,7 @@ struct IosMobileAppApp: App {
     private let quoteRepository: QuoteRepository
     private let authController: AuthController
     private let goalController: GoalController
+    private let userController: UserController
     @StateObject private var themeManager = ThemeManager()
     
     #if DEBUG
@@ -26,6 +27,7 @@ struct IosMobileAppApp: App {
         quoteRepository = QuoteRepository(dbQueue: dbQueue)
         authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
         goalController = GoalController(goalRepository: goalRepository, authController: authController)
+        userController = UserController(userRepository: userRepository, authController: authController)
     }
     
     #if DEBUG
@@ -104,6 +106,7 @@ struct IosMobileAppApp: App {
                     .environmentObject(goalRepository)
                     .environmentObject(quoteRepository)
                     .environmentObject(goalController)
+                    .environmentObject(userController)
                     .environmentObject(themeManager)
                     .preferredColorScheme(themeManager.colorScheme)
                     .task {
@@ -119,6 +122,7 @@ struct IosMobileAppApp: App {
                     .environmentObject(goalRepository)
                     .environmentObject(quoteRepository)
                     .environmentObject(goalController)
+                    .environmentObject(userController)
                     .environmentObject(themeManager)
                     .preferredColorScheme(themeManager.colorScheme)
             }
@@ -129,6 +133,7 @@ struct IosMobileAppApp: App {
                 .environmentObject(goalRepository)
                 .environmentObject(quoteRepository)
                 .environmentObject(goalController)
+                .environmentObject(userController)
                 .environmentObject(themeManager)
                 .preferredColorScheme(themeManager.colorScheme)
             #endif

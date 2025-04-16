@@ -45,6 +45,7 @@ final class DatabaseManager {
                 t.column("username", .text).notNull().unique()
                 t.column("email", .text).notNull()
                 t.column("password", .text).notNull()
+                t.column("profilePictureData", .blob) // Add profile picture data column
             }
 
             // Goal table

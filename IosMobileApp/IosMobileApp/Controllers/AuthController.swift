@@ -40,7 +40,11 @@ class AuthController: ObservableObject {
         }
     }
     
-  
+    // Add method to update current user
+    func updateCurrentUser(_ user: User) {
+        self.currentUser = user
+    }
+    
     func loadUserDetails() {
         username = ""
         password = ""
@@ -197,46 +201,35 @@ class AuthController: ObservableObject {
     }
 
     // Profile update
-    func updateProfile(newUsername: String, newEmail: String, currentPassword: String, newPassword: String?) async throws {
+    func updateProfile(
+        newUsername: String, 
+        newEmail: String, 
+        currentPassword: String, 
+        newPassword: String?,
+        profilePictureData: Data? = nil
+    ) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         
-        guard let userId = currentUser?.id else {
-            errorMessage = "No user logged in"
-            showError = true
-            throw AuthError.noUserLoggedIn
-        }
-        
         do {
-            // Verify current password
-            guard try await userRepository.verifyPassword(userId: userId, password: currentPassword) else {
-                errorMessage = "Current password is incorrect"
-                showError = true
-                throw AuthError.invalidCredentials
-            }
-            
-            // Update profile
-            try await userRepository.updateUser(
-                userId: userId,
-                username: newUsername,
-                email: newEmail,
-                newPassword: newPassword
+            let updatedUser = try await userRepository.updateUser(
+                userID: currentUser?.id ?? UUID(), 
+                newUsername: newUsername,
+                newEmail: newEmail,
+                currentPassword: currentPassword,
+                newPassword: newPassword,
+                profilePictureData: profilePictureData
             )
             
-            // Update local state
-            self.username = newUsername
-            self.email = newEmail
-            if let newPassword = newPassword {
-                self.password = newPassword
-            }
-            
-            // Update current user
-            currentUser?.username = newUsername
-            currentUser?.email = newEmail
-            
+            currentUser = updatedUser
+            return
+        } catch AuthError.invalidPassword {
+            errorMessage = "Current password is incorrect"
+            showError = true
+            throw AuthError.invalidPassword
         } catch AuthError.usernameTaken {
-            errorMessage = "Username already taken"
+            errorMessage = "Username is already taken"
             showError = true
             throw AuthError.usernameTaken
         } catch {
@@ -246,6 +239,21 @@ class AuthController: ObservableObject {
         }
     }
 
+    // Add a method to refresh the current user data
+    func refreshCurrentUser() async {
+        guard let userId = currentUser?.id else { return }
+        
+        do {
+            // Fetch the latest user data from the database
+            if let refreshedUser = try await userRepository.getUserById(userId) {
+                // Update the current user with fresh data
+                currentUser = refreshedUser
+            }
+        } catch {
+            print("Failed to refresh user data: \(error)")
+        }
+    }
+    
     // Logout user
     func logout() {
         // Clear user data

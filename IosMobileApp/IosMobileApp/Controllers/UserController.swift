@@ -18,9 +18,11 @@ class UserController: ObservableObject {
     @Published var isLoading = false
     
     private let userRepository: UserRepository
+    private let authController: AuthController
     
-    init(userRepository: UserRepository) {
+    init(userRepository: UserRepository, authController: AuthController) {
         self.userRepository = userRepository
+        self.authController = authController
     }
     
     func setAuthenticated() {
@@ -107,42 +109,31 @@ class UserController: ObservableObject {
         currentUser = User(id: id, username: username, email: email, password: "")
     }
     
-    func updateProfile(newUsername: String, newEmail: String, currentPassword: String, newPassword: String?) async throws {
+    func updateProfile(newUsername: String, newEmail: String, currentPassword: String, newPassword: String?, profilePictureData: Data? = nil) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         
         do {
-            guard let currentUser = self.currentUser else {
+            // Use the authController's currentUser instead of our own
+            guard let currentUser = authController.currentUser else {
                 throw AuthError.noUserLoggedIn
             }
             
-            // Verify current password
-            guard try await userRepository.verifyPassword(userId: currentUser.id, password: currentPassword) else {
-                throw AuthError.invalidCredentials
-            }
-            
-            // Check if new username is taken (if different from current)
-            if newUsername != currentUser.username {
-                if try await userRepository.isUsernameTaken(newUsername) {
-                    throw AuthError.usernameTaken
-                }
-            }
-            
             // Update user information
-            try await userRepository.updateUser(
-                userId: currentUser.id,
-                username: newUsername,
-                email: newEmail,
-                newPassword: newPassword
+            let updatedUser = try await userRepository.updateUser(
+                userID: currentUser.id,
+                newUsername: newUsername,
+                newEmail: newEmail,
+                currentPassword: currentPassword,
+                newPassword: newPassword,
+                profilePictureData: profilePictureData
             )
             
-            // Update current user information
-            self.currentUser?.username = newUsername
-            self.currentUser?.email = newEmail
-            if let newPassword = newPassword {
-                self.currentUser?.password = newPassword
-            }
+            // Update current user information in both controllers
+            self.currentUser = updatedUser
+            authController.updateCurrentUser(updatedUser)
+            
         } catch let error as AuthError {
             errorMessage = error.localizedDescription
             showError = true
@@ -151,6 +142,74 @@ class UserController: ObservableObject {
             errorMessage = AuthError.unknown.localizedDescription
             showError = true
             throw AuthError.unknown
+        }
+    }
+    
+    // Add a dedicated method for updating just the profile picture
+    func updateProfilePicture(profilePictureData: Data?) async throws {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            // Use the authController's currentUser instead of our own
+            guard let currentUser = authController.currentUser else {
+                throw AuthError.noUserLoggedIn
+            }
+            
+            // Update just the profile picture
+            let updatedUser = try await userRepository.updateProfilePicture(
+                userID: currentUser.id,
+                profilePictureData: profilePictureData
+            )
+            
+            // Update both controllers' currentUser
+            self.currentUser = updatedUser
+            authController.updateCurrentUser(updatedUser)
+            
+        } catch {
+            errorMessage = "Failed to update profile picture: \(error.localizedDescription)"
+            showError = true
+            throw error
+        }
+    }
+    
+    // Add method to update profile info (username, email, picture) without password
+    func updateProfileInfo(
+        newUsername: String,
+        newEmail: String,
+        profilePictureData: Data? = nil
+    ) async throws {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            // Use the authController's currentUser
+            guard let currentUser = authController.currentUser else {
+                throw AuthError.noUserLoggedIn
+            }
+            
+            // Update user information without password verification
+            let updatedUser = try await userRepository.updateProfileInfo(
+                userID: currentUser.id,
+                newUsername: newUsername,
+                newEmail: newEmail,
+                profilePictureData: profilePictureData
+            )
+            
+            // Update current user information in both controllers
+            self.currentUser = updatedUser
+            authController.updateCurrentUser(updatedUser)
+            
+        } catch let error as AuthError {
+            errorMessage = error.localizedDescription
+            showError = true
+            throw error
+        } catch {
+            errorMessage = "Failed to update profile: \(error.localizedDescription)"
+            showError = true
+            throw error
         }
     }
     

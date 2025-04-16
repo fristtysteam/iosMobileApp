@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3F202B7D2DAE78AD00C6B6D2 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F202B7C2DAE78AD00C6B6D2 /* GRDB */; };
+		3F202B912DAE97E800C6B6D2 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F202B902DAE97E800C6B6D2 /* GRDB */; };
 		3F2951562D9FFB8300E6627C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3F2951552D9FFB7C00E6627C /* .gitignore */; };
 /* End PBXBuildFile section */
 
@@ -58,7 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3F202B7D2DAE78AD00C6B6D2 /* GRDB in Frameworks */,
+				3F202B912DAE97E800C6B6D2 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,7 +128,7 @@
 			);
 			name = IosMobileApp;
 			packageProductDependencies = (
-				3F202B7C2DAE78AD00C6B6D2 /* GRDB */,
+				3F202B902DAE97E800C6B6D2 /* GRDB */,
 			);
 			productName = IosMobileApp;
 			productReference = 3F9C48622D844D0200D7A051 /* IosMobileApp.app */;
@@ -213,7 +213,7 @@
 			mainGroup = 3F9C48592D844D0200D7A051;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				3F202B7B2DAE78AD00C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */,
+				3F202B8F2DAE97E800C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3F9C48632D844D0200D7A051 /* Products */;
@@ -419,6 +419,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"IosMobileApp/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to let you select and update your profile picture";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -439,7 +440,7 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -453,6 +454,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"IosMobileApp/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to let you select and update your profile picture";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -473,7 +475,7 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -603,7 +605,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3F202B7B2DAE78AD00C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */ = {
+		3F202B8F2DAE97E800C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
@@ -614,9 +616,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3F202B7C2DAE78AD00C6B6D2 /* GRDB */ = {
+		3F202B902DAE97E800C6B6D2 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3F202B7B2DAE78AD00C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */;
+			package = 3F202B8F2DAE97E800C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */

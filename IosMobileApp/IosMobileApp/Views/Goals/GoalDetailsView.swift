@@ -14,6 +14,32 @@ struct GoalDetailsView: View {
     @State private var showAddProgressEntry = false
     @State private var newProgressEntry = ""
     @State private var isLoading = true
+    @State private var showExitConfirmation = false
+    @State private var didMakeChanges = false
+    
+    // Edit mode states
+    @State private var editedTitle = ""
+    @State private var editedDescription = ""
+    @State private var editedCategory: String?
+    @State private var editedDeadline: Date?
+    @State private var showCategoryPicker = false
+    @State private var showDatePicker = false
+    
+    private var hasUnsavedChanges: Bool {
+        if !isEditing { return false }
+        
+        // Only consider changes if values are actually different from the original
+        guard let originalGoal = goal else { return false }
+        
+        let titleChanged = editedTitle != originalGoal.title
+        let descriptionChanged = editedDescription != (originalGoal.description ?? "")
+        let categoryChanged = editedCategory != originalGoal.category
+        let deadlineChanged = editedDeadline != originalGoal.deadline
+        let progressChanged = editedProgress != originalGoal.progress
+        
+        return titleChanged || descriptionChanged || categoryChanged || 
+               deadlineChanged || progressChanged || didMakeChanges
+    }
     
     init(goalID: UUID) {
         self.goalID = goalID
@@ -32,8 +58,69 @@ struct GoalDetailsView: View {
         }
         .navigationTitle("Goal Details")
         .navigationBarTitleDisplayMode(.inline)
+        .confirmExitOnBack(
+            if: hasUnsavedChanges,
+            showConfirmationDialog: $showExitConfirmation
+        )
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                HStack {
+                    if isEditing {
+                        Button("Save") {
+                            saveChanges()
+                        }
+                    }
+                    Menu {
+                        if !isEditing {
+                            Button(action: { 
+                                isEditing.toggle()
+                            }) {
+                                Label("Edit Goal", systemImage: "pencil")
+                            }
+                        }
+                        Button(role: .destructive, action: { showDeleteConfirmation = true }) {
+                            Label("Delete Goal", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+            }
+        }
+        .alert("Unsaved Changes", isPresented: $showExitConfirmation) {
+            Button("Keep Editing", role: .cancel) { }
+            Button("Discard Changes", role: .destructive) {
+                didMakeChanges = false
+                isEditing = false
+                dismiss()
+            }
+            Button("Save & Exit") {
+                saveChanges()
+                dismiss()
+            }
+        } message: {
+            Text("You have unsaved changes. Would you like to save them before leaving?")
+        }
         .onAppear {
             loadGoal()
+        }
+        .overlay(
+            ToastView(
+                message: toastMessage,
+                type: toastType,
+                isShowing: $showToast
+            )
+        )
+        .alert("Delete Goal", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteGoal()
+            }
+        } message: {
+            Text("Are you sure you want to delete this goal? This action cannot be undone.")
+        }
+        .sheet(isPresented: $showAddProgressEntry) {
+            addProgressEntrySheet
         }
     }
     
@@ -72,56 +159,93 @@ struct GoalDetailsView: View {
             }
             .padding()
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button(role: .destructive, action: { showDeleteConfirmation = true }) {
-                        Label("Delete Goal", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-            }
-        }
-        .overlay(
-            ToastView(
-                message: toastMessage,
-                type: toastType,
-                isShowing: $showToast
-            )
-        )
-        .alert("Delete Goal", isPresented: $showDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
-                deleteGoal()
-            }
-        } message: {
-            Text("Are you sure you want to delete this goal? This action cannot be undone.")
-        }
-        .sheet(isPresented: $showAddProgressEntry) {
-            addProgressEntrySheet
-        }
     }
     
     private func headerSection(_ goal: Goal) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(goal.title)
-                .font(.title)
-                .fontWeight(.bold)
-            
-            if let description = goal.description {
-                Text(description)
+            if isEditing {
+                TextField("Goal Title", text: $editedTitle)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .onChange(of: editedTitle) { _ in didMakeChanges = true }
+                
+                TextField("Description", text: $editedDescription)
                     .font(.body)
                     .foregroundColor(.secondary)
-            }
-            
-            if let category = goal.category {
-                Label(category, systemImage: "tag")
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .onChange(of: editedDescription) { _ in didMakeChanges = true }
+                
+                Button(action: { showCategoryPicker = true }) {
+                    HStack {
+                        Image(systemName: "tag")
+                        Text(editedCategory ?? "Add Category")
+                            .foregroundColor(editedCategory == nil ? .secondary : .blue)
+                    }
+                }
+                .sheet(isPresented: $showCategoryPicker) {
+                    CategorySelectionView(selectedCategory: Binding(
+                        get: { editedCategory ?? "" },
+                        set: { 
+                            editedCategory = $0
+                            didMakeChanges = true
+                        }
+                    ))
+                }
+                
+                Button(action: { showDatePicker = true }) {
+                    HStack {
+                        Image(systemName: "calendar")
+                        Text(editedDeadline?.formatted(date: .abbreviated, time: .omitted) ?? "Add Deadline")
+                            .foregroundColor(editedDeadline == nil ? .secondary : .blue)
+                    }
+                }
+                .sheet(isPresented: $showDatePicker) {
+                    DatePicker("Deadline",
+                             selection: Binding(
+                                get: { editedDeadline ?? Date() },
+                                set: { 
+                                    editedDeadline = $0
+                                    didMakeChanges = true
+                                }
+                             ),
+                             displayedComponents: .date
+                    )
+                    .datePickerStyle(.graphical)
+                    .presentationDetents([.medium])
+                }
+            } else {
+                Text(goal.title)
+                    .font(.title)
+                    .fontWeight(.bold)
+                
+                if let description = goal.description {
+                    Text(description)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                }
+                
+                if let category = goal.category {
+                    Label(category, systemImage: "tag")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
+                
+                if let deadline = goal.deadline {
+                    Label(deadline.formatted(date: .abbreviated, time: .omitted),
+                          systemImage: "calendar")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(radius: 5)
+        )
     }
     
     private func progressSection(_ goal: Goal) -> some View {
@@ -167,6 +291,11 @@ struct GoalDetailsView: View {
                             endPoint: .trailing
                         )
                     )
+                    .onChange(of: editedProgress) { _ in 
+                        if isEditing {
+                            didMakeChanges = true
+                        }
+                    }
                 
                 Button("Update Progress") {
                     updateProgress()
@@ -270,6 +399,7 @@ struct GoalDetailsView: View {
                     systemImage: goal.isCompleted ? "xmark.circle" : "checkmark.circle"
                 )
                 .frame(maxWidth: .infinity)
+                
             }
             .buttonStyle(.borderedProminent)
             .tint(goal.isCompleted ? .red : .green)
@@ -309,6 +439,11 @@ struct GoalDetailsView: View {
             if let loadedGoal = await goalController.getGoalByID(goalID) {
                 goal = loadedGoal
                 editedProgress = loadedGoal.progress
+                // Initialize edit mode states
+                editedTitle = loadedGoal.title
+                editedDescription = loadedGoal.description ?? ""
+                editedCategory = loadedGoal.category
+                editedDeadline = loadedGoal.deadline
             }
             isLoading = false
         }
@@ -318,9 +453,18 @@ struct GoalDetailsView: View {
         guard var updatedGoal = goal else { return }
         updatedGoal.progress = editedProgress
         
+        // Auto-mark as complete if progress is 100%
+        if editedProgress == 1.0 {
+            updatedGoal.isCompleted = true
+        }
+        else {
+            updatedGoal.isCompleted = false
+        }
+        
         Task {
             if await goalController.updateGoal(updatedGoal) {
                 showToast(message: "Progress updated successfully", type: .success)
+                didMakeChanges = false
                 loadGoal()
             }
         }
@@ -361,6 +505,25 @@ struct GoalDetailsView: View {
                 newProgressEntry = ""
                 showAddProgressEntry = false
                 loadGoal()
+            }
+        }
+    }
+    
+    private func saveChanges() {
+        guard var updatedGoal = goal else { return }
+        updatedGoal.title = editedTitle
+        updatedGoal.description = editedDescription
+        updatedGoal.category = editedCategory
+        updatedGoal.deadline = editedDeadline
+        
+        Task {
+            if await goalController.updateGoal(updatedGoal) {
+                showToast(message: "Goal updated successfully", type: .success)
+                didMakeChanges = false
+                isEditing = false
+                loadGoal()
+            } else {
+                showToast(message: "Failed to update goal", type: .error)
             }
         }
     }
