@@ -28,17 +28,35 @@ struct HomeView: View {
                         .frame(height: 140)
                         .shadow(radius: 5)
 
-                    VStack(alignment: .leading) {
-                        Text("Stay consistent.")
-                            .font(.title2.bold())
+                    if isLoadingQuote {
+                        ProgressView("Fetching quote...")
                             .foregroundColor(.white)
-                        Text("Every small step counts.")
-                            .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.8))
+                    } else if let quote = quote {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("\"\(quote.quote)\"")
+                                .font(.title3.bold())
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.leading)
+                            Text("- \(quote.author)")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        .padding()
+                    } else {
+                        VStack(alignment: .leading) {
+                            Text("Loading your daily inspiration...")
+                                .font(.title3.bold())
+                                .foregroundColor(.white)
+                        }
+                        .padding()
                     }
-                    .padding()
                 }
                 .padding(.horizontal)
+                .task {
+                    if quote == nil {
+                        await fetchQuote()
+                    }
+                }
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text("🎯 Recent Goals")
@@ -62,43 +80,6 @@ struct HomeView: View {
                     ProgressBox(title: "In Progress", value: "\(goals.filter { !$0.isCompleted }.count)")
                 }
                 .padding(.horizontal)
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("💬 Quote of the Day")
-                        .font(.title2.bold())
-
-                    if isLoadingQuote {
-                        ProgressView("Fetching quote...")
-                    } else if let quote = quote {
-                        HStack(alignment: .top, spacing: 12) {
-                            Image(systemName: "quote.bubble.fill")
-                                .resizable()
-                                .frame(width: 32, height: 32)
-                                .foregroundColor(.blue)
-
-                            VStack(alignment: .leading) {
-                                Text("\"\(quote.quote)\"")
-                                    .font(.body)
-                                    .italic()
-                                    .foregroundColor(.white)
-                                Text("- \(quote.author)")
-                                    .font(.caption)
-                                    .foregroundColor(.white.opacity(0.8))
-                                    .padding(.top, 2)
-                            }
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .fill(Color.blue)
-                                    .shadow(radius: 5)
-                            )
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                .task {
-                    await fetchQuote()
-                }
             }
             .padding(.bottom, 100)
         }

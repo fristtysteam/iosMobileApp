@@ -1,11 +1,23 @@
 import Foundation
 
 func performQuotesApiCall() async throws -> Quote {
-    let url = URL(string: "https://zenquotes.io/api/today")
-    let (data, _) = try await URLSession.shared.data(from: url!)
+    guard let url = URL(string: "https://zenquotes.io/api/today") else {
+        throw URLError(.badURL)
+    }
+    
+    let (data, response) = try await URLSession.shared.data(from: url)
+    
+    guard let httpResponse = response as? HTTPURLResponse,
+          httpResponse.statusCode == 200 else {
+        throw URLError(.badServerResponse)
+    }
     
     // Decode the array of quotes
     let quotes = try JSONDecoder().decode([Quote].self, from: data)
     
-    return quotes[0] // Assuming the response contains at least one quote
+    guard let firstQuote = quotes.first else {
+        throw URLError(.cannotParseResponse)
+    }
+    
+    return firstQuote
 }
