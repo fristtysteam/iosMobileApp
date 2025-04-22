@@ -150,6 +150,8 @@ struct AddGoalView: View {
                 onGoalAdded(createdGoalID)
                 presentationMode.wrappedValue.dismiss()
             }
+            
+            NotificationCenter.default.post(name: Notification.Name("Goal Created"), object: nil)
         }
     }
 }
@@ -161,7 +163,9 @@ struct AddGoalView_Previews: PreviewProvider {
         let userRepository = UserRepository(dbQueue: dbQueue)
         let goalRepository = GoalRepository(dbQueue: dbQueue)
         let authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
+        let goalController = GoalController(goalRepository: goalRepository, authController: authController)
         AddGoalView(onGoalAdded: { _ in })
             .environmentObject(authController)
+            .environmentObject(goalController)
     }
 }
