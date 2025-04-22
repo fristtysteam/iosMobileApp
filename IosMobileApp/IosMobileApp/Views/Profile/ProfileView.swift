@@ -65,6 +65,7 @@ struct ProfileView: View {
                                 Image(systemName: "person.fill")
                                 Text("Edit Profile")
                             }
+                            .foregroundColor(.primary)
                         }
                         
                         Toggle(isOn: $notificationsEnabled) {
@@ -76,13 +77,15 @@ struct ProfileView: View {
                     }
                     
                     Section(header: Text("Appearance")) {
-                        Button(action: { themeManager.toggleTheme() }) {
+                        Toggle(isOn: Binding(
+                            get: { themeManager.colorScheme == .dark },
+                            set: { _ in themeManager.toggleTheme() }
+                        )) {
                             HStack {
                                 Image(systemName: themeManager.colorScheme == .dark ? "moon.fill" : "sun.max.fill")
                                 Text("Dark Mode")
-                                Spacer()
-                                Image(systemName: themeManager.colorScheme == .dark ? "checkmark.circle.fill" : "circle")
                             }
+                            .foregroundColor(.primary)
                         }
                     }
                     

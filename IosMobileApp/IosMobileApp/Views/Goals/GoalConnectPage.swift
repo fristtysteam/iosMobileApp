@@ -55,26 +55,22 @@ struct GoalConnectPage: View {
                     }
                     .padding(.horizontal, 20)
 
-                    // Recent Goals Section
+                    // Timeline Section
                     if !goalController.goals.isEmpty {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Recent Goals")
+                            Text("Goal Timeline")
                                 .font(.headline)
                                 .padding(.horizontal, 24)
                             
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    ForEach(goalController.goals.prefix(3)) { goal in
-                                        Button(action: {
-                                            selectedGoalID = goal.id
-                                            showingGoalDetails = true
-                                        }) {
-                                            RecentGoalCard(goal: goal)
-                                        }
+                            VStack(spacing: 0) {
+                                ForEach(goalController.goals.prefix(5)) { goal in
+                                    TimelineItemView(goal: goal) {
+                                        selectedGoalID = goal.id
+                                        showingGoalDetails = true
                                     }
                                 }
-                                .padding(.horizontal, 24)
                             }
+                            .padding(.horizontal, 24)
                         }
                     }
 
@@ -105,93 +101,89 @@ struct GoalConnectPage: View {
     }
 }
 
-struct RecentGoalCard: View {
+struct TimelineItemView: View {
     let goal: Goal
+    let action: () -> Void
     @Environment(\.colorScheme) var colorScheme
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Title and completion status
-            HStack {
-                Text(goal.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                Spacer()
-                if goal.isCompleted {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                }
-            }
-            
-            // Progress section
-            VStack(alignment: .leading, spacing: 8) {
-                ProgressView(value: goal.progress)
-                    .tint(
-                        LinearGradient(
-                            colors: [.gray.opacity(0.6), .gray],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                
-                Text("\(Int(goal.progress * 100))% Complete")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Divider()
-            
-            // Category and deadline
-            VStack(alignment: .leading, spacing: 8) {
-                if let category = goal.category {
-                    HStack(spacing: 6) {
-                        Image(systemName: "tag.fill")
-                            .font(.caption)
-                        Text(category)
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
-                }
-                
-                if let deadline = goal.deadline {
-                    HStack(spacing: 6) {
-                        Image(systemName: "calendar")
-                            .font(.caption)
-                        Text(deadline.formatted(.dateTime.month().day()))
-                            .font(.caption)
-                    }
-                    .foregroundColor(.secondary)
-                }
-            }
+    private var statusColor: Color {
+        if goal.isCompleted {
+            return .green
+        } else if goal.progress > 0 {
+            return .orange
+        } else {
+            return .gray
         }
-        .padding()
-        .frame(width: 280)
-        .background(
-            ZStack {
-                // Main card background
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.secondarySystemBackground))
-                
-                // Bottom folding effect
-                VStack {
-                    Spacer()
-                    LinearGradient(
-                        colors: [
-                            colorScheme == .dark ? .black.opacity(0.3) : .white.opacity(0.3),
-                            colorScheme == .dark ? .black.opacity(0.1) : .white.opacity(0.1)
-                        ],
-                        startPoint: .bottom,
-                        endPoint: .top
-                    )
-                    .frame(height: 40)
+    }
+    
+    private var formattedDate: String {
+        if let deadline = goal.deadline {
+            return deadline.formatted(.dateTime.month().day())
+        }
+        return "No deadline"
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(alignment: .center, spacing: 16) {
+                // Timeline dot and line
+                VStack(spacing: 0) {
+                    Rectangle()
+                        .fill(statusColor.opacity(0.3))
+                        .frame(width: 2)
+                    Circle()
+                        .fill(statusColor)
+                        .frame(width: 8, height: 8)
+                    Rectangle()
+                        .fill(statusColor.opacity(0.3))
+                        .frame(width: 2)
                 }
-                .clipShape(
-                    RoundedRectangle(cornerRadius: 16)
+                .frame(height: 80)
+                
+                // Content
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .center, spacing: 8) {
+                        Text(goal.title)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .lineLimit(1)
+                        
+                        if goal.isCompleted {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.caption)
+                        }
+                        
+                        Spacer()
+                        
+                        Text(formattedDate)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack(spacing: 12) {
+                        if let category = goal.category {
+                            Text(category)
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Text("\(Int(goal.progress * 100))%")
+                            .font(.caption2)
+                            .foregroundColor(statusColor)
+                    }
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(.secondarySystemBackground))
+                        .shadow(color: colorScheme == .dark ? .clear : .black.opacity(0.03),
+                               radius: 3, x: 0, y: 1)
                 )
             }
-        )
-        .shadow(color: colorScheme == .dark ? .clear : .black.opacity(0.05),
-                radius: 8, x: 0, y: 4)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
