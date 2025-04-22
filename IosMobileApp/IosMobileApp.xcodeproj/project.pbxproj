@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3F202B912DAE97E800C6B6D2 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F202B902DAE97E800C6B6D2 /* GRDB */; };
+		3F202B7D2DAE78AD00C6B6D2 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F202B7C2DAE78AD00C6B6D2 /* GRDB */; };
 		3F2951562D9FFB8300E6627C /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 3F2951552D9FFB7C00E6627C /* .gitignore */; };
+		3FFAEEC42DB7C5DA00EA45F0 /* Assets 3.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3FFAEEC32DB7C5DA00EA45F0 /* Assets 3.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,24 +34,12 @@
 		3F9C48622D844D0200D7A051 /* IosMobileApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IosMobileApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F9C48722D844D0300D7A051 /* IosMobileAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IosMobileAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F9C487C2D844D0300D7A051 /* IosMobileAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IosMobileAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3FFAEEC32DB7C5DA00EA45F0 /* Assets 3.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Assets 3.xcassets"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		3F202D422DB7B20800C6B6D2 /* Exceptions for "IosMobileApp" folder in "IosMobileApp" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 3F9C48612D844D0200D7A051 /* IosMobileApp */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3F9C48642D844D0200D7A051 /* IosMobileApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				3F202D422DB7B20800C6B6D2 /* Exceptions for "IosMobileApp" folder in "IosMobileApp" target */,
-			);
 			path = IosMobileApp;
 			sourceTree = "<group>";
 		};
@@ -71,7 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3F202B912DAE97E800C6B6D2 /* GRDB in Frameworks */,
+				3F202B7D2DAE78AD00C6B6D2 /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +90,7 @@
 				3F9C487F2D844D0300D7A051 /* IosMobileAppUITests */,
 				3FA3CF9B2DAD67BB00BC48D6 /* Frameworks */,
 				3F9C48632D844D0200D7A051 /* Products */,
+				3FFAEEC32DB7C5DA00EA45F0 /* Assets 3.xcassets */,
 			);
 			sourceTree = "<group>";
 		};
@@ -141,7 +131,7 @@
 			);
 			name = IosMobileApp;
 			packageProductDependencies = (
-				3F202B902DAE97E800C6B6D2 /* GRDB */,
+				3F202B7C2DAE78AD00C6B6D2 /* GRDB */,
 			);
 			productName = IosMobileApp;
 			productReference = 3F9C48622D844D0200D7A051 /* IosMobileApp.app */;
@@ -226,7 +216,7 @@
 			mainGroup = 3F9C48592D844D0200D7A051;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				3F202B8F2DAE97E800C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */,
+				3F202B7B2DAE78AD00C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3F9C48632D844D0200D7A051 /* Products */;
@@ -246,6 +236,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F2951562D9FFB8300E6627C /* .gitignore in Resources */,
+				3FFAEEC42DB7C5DA00EA45F0 /* Assets 3.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -432,8 +423,6 @@
 				DEVELOPMENT_ASSET_PATHS = "\"IosMobileApp/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = IosMobileApp/Info.plist;
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Please allow access to your photo library to set your profile picture";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -454,7 +443,7 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -468,8 +457,6 @@
 				DEVELOPMENT_ASSET_PATHS = "\"IosMobileApp/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = IosMobileApp/Info.plist;
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Please allow access to your photo library to set your profile picture";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -490,7 +477,7 @@
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -620,7 +607,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3F202B8F2DAE97E800C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */ = {
+		3F202B7B2DAE78AD00C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
@@ -631,9 +618,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3F202B902DAE97E800C6B6D2 /* GRDB */ = {
+		3F202B7C2DAE78AD00C6B6D2 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3F202B8F2DAE97E800C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */;
+			package = 3F202B7B2DAE78AD00C6B6D2 /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */

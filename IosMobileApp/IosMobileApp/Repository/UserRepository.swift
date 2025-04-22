@@ -219,4 +219,34 @@ class UserRepository: ObservableObject {
             try User.fetchOne(db, key: userId.uuidString)
         }
     }
-} 
+    func getUserWithBadges(userId: UUID) async throws -> User {
+        return try await database.read { db in
+            guard var user = try User.fetchOne(db, key: userId.uuidString) else {
+                throw AuthError.userNotFound
+            }
+
+            let badges = try Badge
+                .filter(sql: """
+                    id IN (
+                        SELECT badgeId FROM userbadge WHERE userId = ?
+                    )
+                """, arguments: [userId.uuidString])
+                .fetchAll(db)
+
+          
+            return user
+        }
+    }
+
+
+    func getCompletedGoalsCount(userId: UUID) async throws -> Int {
+        return try await database.read { db in
+            try Goal
+                .filter(Column("userId") == userId.uuidString)
+                .filter(Column("isCompleted") == true)
+                .fetchCount(db)
+        }
+    }
+    
+    
+}

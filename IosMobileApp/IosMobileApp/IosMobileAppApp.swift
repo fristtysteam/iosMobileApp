@@ -20,13 +20,26 @@ struct IosMobileAppApp: App {
     #endif
     
     // Initialize everything
+    // Update the init in your App struct
     init() {
         let dbQueue = databaseManager.getDatabase()
         userRepository = UserRepository(dbQueue: dbQueue)
         goalRepository = GoalRepository(dbQueue: dbQueue)
         quoteRepository = QuoteRepository(dbQueue: dbQueue)
+        let badgeRepository = BadgeRepository(dbQueue: dbQueue)
+        
+        // Initialize badges if needed
+        Task {
+            try await badgeRepository.initializeBadges()
+        }
+        
         authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
-        goalController = GoalController(goalRepository: goalRepository, authController: authController)
+        goalController = GoalController(
+            goalRepository: goalRepository,
+            authController: authController,
+            badgeRepository: badgeRepository,
+            userRepository: userRepository
+        )
         userController = UserController(userRepository: userRepository, authController: authController)
     }
     

@@ -6,6 +6,10 @@ struct ProfileView: View {
     @State private var notificationsEnabled = false
     @State private var showEditProfile = false
     @State private var showLogoutAlert = false
+    @State private var userBadges: [Badge] = []
+    @State private var allBadges: [Badge] = []
+    @State private var isLoadingBadges = false
+    @State private var showBadgesSheet = false
     
     // Observer for forcing view refresh when data changes
     @State private var viewRefreshCounter = 0
@@ -15,7 +19,7 @@ struct ProfileView: View {
     @EnvironmentObject var themeManager: ThemeManager
     
     // Current user data derived from authController for binding in views
-    private var username: String { 
+    private var username: String {
         authController.currentUser?.username ?? ""
     }
     
@@ -76,6 +80,31 @@ struct ProfileView: View {
                         }
                     }
                     
+                    Section(header: Text("Achievements")) {
+                        Button(action: { showBadgesSheet = true }) {
+                            HStack {
+                                Image(systemName: "rosette")
+                                Text("View Badges")
+                                Spacer()
+                                if !userBadges.isEmpty {
+                                    Text("\(userBadges.count) earned")
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                        
+                        if !userBadges.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 15) {
+                                    ForEach(userBadges.prefix(5)) { badge in
+                                        BadgeView(badge: badge, isEarned: true, size: 50)
+                                    }
+                                }
+                                .padding()
+                            }
+                        }
+                    }
+                    
                     Section(header: Text("Appearance")) {
                         Toggle(isOn: Binding(
                             get: { themeManager.colorScheme == .dark },
@@ -124,6 +153,28 @@ struct ProfileView: View {
                 // Refresh when the view appears
                 refreshProfileData()
             }
+            .sheet(isPresented: $showBadgesSheet) {
+                NavigationView {
+                    // Pass the BadgeRepository and userId to BadgeCollectionView
+                    BadgeCollectionView(
+                        badgeRepository: BadgeRepository(dbQueue: DatabaseManager.shared.getDatabase()), // Pass the repository
+                        userId: authController.currentUser?.id ?? UUID() // Pass the userId
+                    )
+                    .navigationTitle("Your Badges")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Done") {
+                                showBadgesSheet = false
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add this task modifier to load badges
+            .task {
+                await loadBadges()
+            }
         }
     }
     
@@ -139,6 +190,28 @@ struct ProfileView: View {
                 // Increment refresh counter to force SwiftUI to rebuild the views
                 viewRefreshCounter += 1
             }
+        }
+    }
+    
+    private func loadBadges() async {
+        guard let userId = authController.currentUser?.id else { return }
+        
+        isLoadingBadges = true
+        defer { isLoadingBadges = false }
+        
+        do {
+            let badgeRepository = BadgeRepository(dbQueue: DatabaseManager.shared.getDatabase())
+            async let fetchedUserBadges = badgeRepository.getBadgesForUser(userId: userId)
+            async let fetchedAllBadges = badgeRepository.getAllBadges()
+            
+            let (userBadgesResult, allBadgesResult) = await (try fetchedUserBadges, try fetchedAllBadges)
+            
+            await MainActor.run {
+                self.userBadges = userBadgesResult
+                self.allBadges = allBadgesResult
+            }
+        } catch {
+            print("Error loading badges: \(error)")
         }
     }
 }
@@ -158,5 +231,3 @@ struct ProfileView_Previews: PreviewProvider {
             .environmentObject(themeManager)
     }
 }
-
-

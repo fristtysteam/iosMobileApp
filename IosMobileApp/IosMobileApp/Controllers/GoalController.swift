@@ -7,15 +7,19 @@ class GoalController: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var showError = false
-    
+
     private let goalRepository: GoalRepository
     private let authController: AuthController
-    
-    init(goalRepository: GoalRepository, authController: AuthController) {
+    private let badgeRepository: BadgeRepository
+    private let userRepository: UserRepository
+
+    init(goalRepository: GoalRepository, authController: AuthController, badgeRepository: BadgeRepository, userRepository: UserRepository) {
         self.goalRepository = goalRepository
         self.authController = authController
+        self.badgeRepository = badgeRepository
+        self.userRepository = userRepository
     }
-    
+
     func loadGoals() async {
         isLoading = true
         do {
@@ -28,7 +32,7 @@ class GoalController: ObservableObject {
         }
         isLoading = false
     }
-    
+
     func createGoal(title: String, description: String?, category: String?, deadline: Date?, progress: Double, isCompleted: Bool) async -> UUID? {
         isLoading = true
         do {
@@ -37,7 +41,7 @@ class GoalController: ObservableObject {
                 showError = true
                 return nil
             }
-            
+
             let newGoal = Goal(
                 userId: currentUserId,
                 title: title,
@@ -47,9 +51,9 @@ class GoalController: ObservableObject {
                 progress: progress,
                 isCompleted: isCompleted
             )
-            
+
             try await goalRepository.saveGoal(newGoal)
-            await loadGoals() // Refresh goals list
+            await loadGoals()
             return newGoal.id
         } catch {
             errorMessage = "Failed to create goal: \(error.localizedDescription)"
@@ -58,12 +62,12 @@ class GoalController: ObservableObject {
             return nil
         }
     }
-    
+
     func updateGoal(_ goal: Goal) async -> Bool {
         isLoading = true
         do {
             try await goalRepository.saveGoal(goal)
-            await loadGoals() // Refresh goals list
+            await loadGoals()
             return true
         } catch {
             errorMessage = "Failed to update goal: \(error.localizedDescription)"
@@ -72,12 +76,12 @@ class GoalController: ObservableObject {
             return false
         }
     }
-    
+
     func deleteGoal(_ goal: Goal) async -> Bool {
         isLoading = true
         do {
             try await goalRepository.deleteGoal(goal)
-            await loadGoals() // Refresh goals list
+            await loadGoals()
             return true
         } catch {
             errorMessage = "Failed to delete goal: \(error.localizedDescription)"
@@ -86,15 +90,12 @@ class GoalController: ObservableObject {
             return false
         }
     }
-    
+
     func getGoalByID(_ id: UUID) async -> Goal? {
         do {
-            // First try to find the goal in the current goals array
             if let goal = goals.first(where: { $0.id == id }) {
                 return goal
             }
-            
-            // If not found in memory, try to fetch from database
             if let goal = try await goalRepository.getGoalByID(goalID: id) {
                 return goal
             } else {
@@ -108,12 +109,12 @@ class GoalController: ObservableObject {
             return nil
         }
     }
-    
+
     func clearAllGoals() async -> Bool {
         isLoading = true
         do {
             try await goalRepository.clearAllGoals()
-            await loadGoals() // Refresh goals list to empty array
+            await loadGoals()
             return true
         } catch {
             errorMessage = "Failed to clear goals: \(error.localizedDescription)"
@@ -122,10 +123,63 @@ class GoalController: ObservableObject {
             return false
         }
     }
-    
-    // Helper method to clear any errors
+
+    func completeGoal(goal: Goal) async -> Bool {
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            guard let currentUserId = authController.currentUser?.id else {
+                errorMessage = "No user logged in"
+                showError = true
+                return false
+            }
+
+            var completedGoal = goal
+            completedGoal.isCompleted = true
+            completedGoal.progress = 1.0
+
+            try await goalRepository.saveGoal(completedGoal)
+
+            let completedCount = try await userRepository.getCompletedGoalsCount(userId: currentUserId)
+
+            let newBadges = try await badgeRepository.checkForNewBadges(
+                userId: currentUserId,
+                completedGoalsCount: completedCount
+            )
+
+            for badge in newBadges {
+                try await badgeRepository.awardBadge(userId: currentUserId, badgeId: badge.id)
+                showBadgeCelebration(badge: badge)
+            }
+
+            await loadGoals()
+            return true
+        } catch {
+            errorMessage = "Failed to complete goal: \(error.localizedDescription)"
+            showError = true
+            return false
+        }
+    }
+
+    private func showBadgeCelebration(badge: Badge) {
+        DispatchQueue.main.async {
+            let alert = UIAlertController(
+                title: "New Badge Earned!",
+                message: "You've earned the \(badge.name) badge: \(badge.description)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootViewController = windowScene.windows.first?.rootViewController {
+                rootViewController.present(alert, animated: true)
+            }
+        }
+    }
+
     func clearError() {
         errorMessage = nil
         showError = false
     }
-} 
+}

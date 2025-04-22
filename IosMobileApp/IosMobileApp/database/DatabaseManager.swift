@@ -39,16 +39,25 @@ final class DatabaseManager {
     // This function creates the necessary tables in the database
     private func createTables() throws {
         try dbQueue?.write { db in
-            // User table
+            // User table (existing)
             try db.create(table: "user", ifNotExists: true) { t in
                 t.column("id", .text).primaryKey()
                 t.column("username", .text).notNull().unique()
                 t.column("email", .text).notNull()
                 t.column("password", .text).notNull()
-                t.column("profilePictureData", .blob) // Add profile picture data column
+                t.column("profilePictureData", .blob)
             }
 
-            // Goal table
+            // Add the badge table BEFORE user_badge
+            try db.create(table: "badge", ifNotExists: true) { t in
+                t.column("id", .text).primaryKey()
+                t.column("name", .text).notNull()
+                t.column("description", .text).notNull()
+                t.column("imageName", .text).notNull()
+                t.column("goalCountRequired", .integer).notNull()
+            }
+
+            // Goal table (existing)
             try db.create(table: "goal", ifNotExists: true) { t in
                 t.column("id", .text).primaryKey()
                 t.column("title", .text).notNull()
@@ -58,11 +67,21 @@ final class DatabaseManager {
                 t.column("isCompleted", .boolean).notNull().defaults(to: false)
                 t.column("progress", .double).notNull().defaults(to: 0)
                 t.column("userId", .text).notNull()
-                t.column("progressDiary", .blob)  // Store progress diary as JSON blob
+                t.column("progressDiary", .blob)
                 t.foreignKey(["userId"], references: "user", onDelete: .cascade)
             }
 
-            // Quote table
+            // UserBadge table - renamed to match model
+            try db.create(table: "userBadge", ifNotExists: true) { t in
+                t.column("userId", .text).notNull()
+                t.column("badgeId", .text).notNull()
+                t.column("dateEarned", .datetime).notNull()
+                t.primaryKey(["userId", "badgeId"])
+                t.foreignKey(["userId"], references: "user", onDelete: .cascade)
+                t.foreignKey(["badgeId"], references: "badge", onDelete: .cascade)
+            }
+
+            // Quote table (existing)
             try db.create(table: "quote", ifNotExists: true) { t in
                 t.column("quote", .text).notNull()
                 t.column("author", .text).notNull()
@@ -70,14 +89,34 @@ final class DatabaseManager {
             }
         }
     }
-
     // This function seeds initial data like sample quotes if there are no users
     private func seedInitialData() throws {
         let userCount = try dbQueue?.read { db in
             try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM user") ?? 0
         }
+        let badgeCount = try dbQueue?.read { db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM badge") ?? 0
+            }
+
 
         guard userCount == 0 else { return }
+        guard badgeCount == 0 else { return }
+        
+        let defaultBadges = [
+                Badge(id: "beginner", name: "Beginner", description: "Completed 1 goal", imageName: "badge.beginner", goalCountRequired: 1),
+                Badge(id: "achiever", name: "Achiever", description: "Completed 5 goals", imageName: "badge.achiever", goalCountRequired: 5),
+                Badge(id: "expert", name: "Expert", description: "Completed 10 goals", imageName: "badge.expert", goalCountRequired: 10),
+                Badge(id: "master", name: "Master", description: "Completed 25 goals", imageName: "badge.master", goalCountRequired: 25),
+                Badge(id: "legend", name: "Legend", description: "Completed 50 goals", imageName: "badge.legend", goalCountRequired: 50)
+            ]
+            
+            try dbQueue?.write { db in
+                for badge in defaultBadges {
+                    try badge.insert(db)
+                }
+                print("✅ Seeded \(defaultBadges.count) badges")
+            }
+
 
         // Create a test user
         let testUser = User(
@@ -151,6 +190,9 @@ final class DatabaseManager {
             }
             print("✅ Seeded \(sampleQuotes.count) quotes")
         }
+        
+        
+        
     }
 
     // Returns the shared database queue instance

@@ -6,7 +6,7 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
     var username: String
     var email: String
     var password: String
-    var goals: [Goal] = [] 
+    var goals: [Goal] = []
     var profilePictureData: Data?
     
     init(id: UUID = UUID(), username: String, email: String, password: String, goals: [Goal] = [], profilePictureData: Data? = nil) {
@@ -43,3 +43,10 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
         profilePictureData = row["profilePictureData"] as? Data
     }
 }
+extension User {
+    func hasBadge(_ badgeId: String) -> Bool {
+        return false
+    }
+}
+
+
