@@ -9,45 +9,47 @@ struct GoalCardView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(1)
             
-            Text(description ?? "No description")
-                .frame(maxWidth: 350, alignment: .leading)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            if let description = description, !description.isEmpty {
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+            }
             
-            HStack {
-                CircularProgressView(progress: progress * 0.01)
+            HStack(spacing: 20) {
+                CircularProgressView(progress: progress)
                     .frame(width: 75, height: 75)
                 
-                Spacer()
-                
-                VStack {
-                    VStack {
-                        Text("Category")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(.secondary)
-                        
-                        Text(category ?? "N/A")
-                            .bold()
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 12) {
+                    if let category = category {
+                        HStack(spacing: 6) {
+                            Image(systemName: "tag.fill")
+                                .font(.caption)
+                            Text(category)
+                                .font(.subheadline)
+                        }
+                        .foregroundColor(.secondary)
                     }
                     
-                    VStack {
-                        Text("Deadline")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(.secondary)
-                        Text(deadline?.formatted(.dateTime.year().month().day()) ?? "N/A")
-                            .bold()
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                    if let deadline = deadline {
+                        HStack(spacing: 6) {
+                            Image(systemName: "calendar")
+                                .font(.caption)
+                            Text(deadline.formatted(.dateTime.year().month().day()))
+                                .font(.subheadline)
+                        }
+                        .foregroundColor(.secondary)
                     }
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 4)
         }
         .padding()
         .background(

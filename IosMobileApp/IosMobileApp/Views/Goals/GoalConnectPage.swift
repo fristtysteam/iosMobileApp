@@ -55,38 +55,25 @@ struct GoalConnectPage: View {
                     }
                     .padding(.horizontal, 20)
 
-                    // Recent Goals Section
+                    // Timeline Section
                     if !goalController.goals.isEmpty {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Recent Goals")
+                            Text("Goal Timeline")
                                 .font(.headline)
                                 .padding(.horizontal, 24)
                             
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
-                                    ForEach(goalController.goals.prefix(3)) { goal in
-                                        Button(action: {
-                                            selectedGoalID = goal.id
-                                            showingGoalDetails = true
-                                        }) {
-                                            RecentGoalCard(goal: goal)
-                                        }
+                            VStack(spacing: 0) {
+                                ForEach(goalController.goals.prefix(5)) { goal in
+                                    TimelineItemView(goal: goal) {
+                                        selectedGoalID = goal.id
+                                        showingGoalDetails = true
                                     }
                                 }
-                                .padding(.horizontal, 24)
                             }
+                            .padding(.horizontal, 24)
                         }
                     }
 
-                    // Motivational section
-                    VStack(spacing: 16) {
-                        Text("Daily Inspiration")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 24)
-                    }
-                    .padding(.top, 8)
                 }
                 .padding(.bottom, 80)
             }
@@ -114,37 +101,89 @@ struct GoalConnectPage: View {
     }
 }
 
-struct RecentGoalCard: View {
+struct TimelineItemView: View {
     let goal: Goal
+    let action: () -> Void
+    @Environment(\.colorScheme) var colorScheme
+    
+    private var statusColor: Color {
+        if goal.isCompleted {
+            return .green
+        } else if goal.progress > 0 {
+            return .orange
+        } else {
+            return .gray
+        }
+    }
+    
+    private var formattedDate: String {
+        if let deadline = goal.deadline {
+            return deadline.formatted(.dateTime.month().day())
+        }
+        return "No deadline"
+    }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(goal.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                Spacer()
-                if goal.isCompleted {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+        Button(action: action) {
+            HStack(alignment: .center, spacing: 16) {
+                // Timeline dot and line
+                VStack(spacing: 0) {
+                    Rectangle()
+                        .fill(statusColor.opacity(0.3))
+                        .frame(width: 2)
+                    Circle()
+                        .fill(statusColor)
+                        .frame(width: 8, height: 8)
+                    Rectangle()
+                        .fill(statusColor.opacity(0.3))
+                        .frame(width: 2)
                 }
+                .frame(height: 80)
+                
+                // Content
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .center, spacing: 8) {
+                        Text(goal.title)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .lineLimit(1)
+                        
+                        if goal.isCompleted {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                                .font(.caption)
+                        }
+                        
+                        Spacer()
+                        
+                        Text(formattedDate)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack(spacing: 12) {
+                        if let category = goal.category {
+                            Text(category)
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Text("\(Int(goal.progress * 100))%")
+                            .font(.caption2)
+                            .foregroundColor(statusColor)
+                    }
+                }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(.secondarySystemBackground))
+                        .shadow(color: colorScheme == .dark ? .clear : .black.opacity(0.03),
+                               radius: 3, x: 0, y: 1)
+                )
             }
-            
-            if let category = goal.category {
-                Label(category, systemImage: "tag")
-                    .font(.caption)
-                    .foregroundColor(.blue)
-            }
-            
-            ProgressView(value: goal.progress)
-                .tint(goal.isCompleted ? .green : .blue)
         }
-        .padding()
-        .frame(width: 280)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemBackground))
-        )
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

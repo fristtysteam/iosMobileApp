@@ -17,7 +17,6 @@ struct EditProfileView: View {
     @State private var profileImage: UIImage?
     @State private var showImagePicker: Bool = false
     @State private var hasChangedImage: Bool = false
-    @State private var showPermissionAlert: Bool = false
     
     @State private var isLoading: Bool = false
     @State private var showToast: Bool = false
@@ -153,42 +152,63 @@ struct EditProfileView: View {
             ImagePicker(selectedImage: $profileImage, isPresented: $showImagePicker)
                 .onDisappear {
                     if let newImage = profileImage {
+                        print("📸 Image selected: \(newImage.size)")
                         hasChangedImage = true
+                        
+                        // Try to update the profile picture immediately
+                        Task {
+                            do {
+                                let imageData = newImage.jpegData(compressionQuality: 0.7)
+                                print("📸 Image data size: \(imageData?.count ?? 0) bytes")
+                                try await userController.updateProfilePicture(profilePictureData: imageData)
+                                print("📸 Profile picture updated successfully")
+                            } catch {
+                                print("❌ Failed to update profile picture: \(error)")
+                                toastMessage = "Failed to update profile picture"
+                                toastType = .error
+                                showToast = true
+                            }
+                        }
+                    } else {
+                        print("❌ No image selected")
                     }
                 }
-        }
-        .alert("Photo Library Access", isPresented: $showPermissionAlert) {
-            Button("Settings", role: .none) {
-                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(settingsUrl)
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Please allow access to your photo library to select a profile picture.")
         }
     }
     
     private func checkPhotoLibraryPermission() {
-        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        print("🔍 Checking photo library permission")
         
-        switch status {
+        let currentStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        print("📱 Current photo library status: \(currentStatus.rawValue)")
+        
+        switch currentStatus {
         case .notDetermined:
+            // First time request - this will show the permission dialog
             PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
                 DispatchQueue.main.async {
                     if status == .authorized || status == .limited {
+                        print("✅ Photo library access granted, showing picker")
                         self.showImagePicker = true
                     } else {
-                        self.showPermissionAlert = true
+                        print("❌ Photo library access denied")
+                        self.toastMessage = "Please allow access to your photos to set a profile picture"
+                        self.toastType = .error
+                        self.showToast = true
                     }
                 }
             }
-        case .restricted, .denied:
-            showPermissionAlert = true
         case .authorized, .limited:
-            showImagePicker = true
+            print("✅ Already have photo library access, showing picker")
+            self.showImagePicker = true
+        case .denied, .restricted:
+            print("❌ Photo library access denied or restricted")
+            self.toastMessage = "Please allow access to your photos in Settings to set a profile picture"
+            self.toastType = .error
+            self.showToast = true
         @unknown default:
-            showPermissionAlert = true
+            print("❌ Unknown photo library access status")
+            break
         }
     }
     
@@ -246,7 +266,7 @@ struct EditProfileView: View {
                         }
                         
                         guard newPassword.count >= 6 else {
-                            showError("New password must be at least 6 characters")
+                            showError("New pasword must be at least 6 characters")
                             isLoading = false
                             return
                         }

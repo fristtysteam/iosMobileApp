@@ -3,12 +3,10 @@ import GRDB
 import Combine
 
 struct ProfileView: View {
-    @State private var dataSharingEnabled = false
     @State private var showEditProfile = false
     @State private var showLogoutAlert = false
     @State private var showNotificationPermissionAlert = false
     
-    // Observer for forcing view refresh when data changes
     @State private var viewRefreshCounter = 0
     
     @EnvironmentObject var authController: AuthController
@@ -16,7 +14,6 @@ struct ProfileView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var notificationService = NotificationService.shared
     
-    // Current user data derived from authController for binding in views
     private var username: String { 
         authController.currentUser?.username ?? ""
     }
@@ -25,7 +22,6 @@ struct ProfileView: View {
         authController.currentUser?.email ?? ""
     }
     
-    // Get profile image directly from current user data each time
     private var profileImage: UIImage? {
         guard let imageData = authController.currentUser?.profilePictureData else {
             return nil
@@ -133,13 +129,6 @@ struct ProfileView: View {
                         }
                     }
                 }
-                
-                Toggle(isOn: $dataSharingEnabled) {
-                    HStack {
-                        Image(systemName: "chart.bar.fill")
-                        Text("Data Sharing")
-                    }
-                }
             }
             
             Section(header: Text("Appearance")) {
@@ -192,5 +181,3 @@ struct ProfileView_Previews: PreviewProvider {
             .environmentObject(themeManager)
     }
 }
-
-
