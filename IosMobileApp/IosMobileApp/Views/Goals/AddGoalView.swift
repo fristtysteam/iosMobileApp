@@ -162,8 +162,14 @@ struct AddGoalView_Previews: PreviewProvider {
         let dbQueue = try! DatabaseQueue()
         let userRepository = UserRepository(dbQueue: dbQueue)
         let goalRepository = GoalRepository(dbQueue: dbQueue)
+        let badgeRepository = BadgeRepository(dbQueue: dbQueue)
         let authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
-        let goalController = GoalController(goalRepository: goalRepository, authController: authController)
+        let goalController = GoalController(
+            goalRepository: goalRepository,
+            authController: authController,
+            badgeRepository: badgeRepository,
+            userRepository: userRepository
+        )
         AddGoalView(onGoalAdded: { _ in })
             .environmentObject(authController)
             .environmentObject(goalController)

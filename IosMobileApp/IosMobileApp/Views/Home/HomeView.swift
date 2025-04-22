@@ -107,7 +107,7 @@ struct ProgressBox: View {
         VStack {
             Text(value)
                 .font(.title.bold())
-                .foregroundColor(.black)
+                .foregroundColor(colorScheme == .dark ? .white : .black)
             Text(title)
                 .font(.caption)
                 .foregroundColor(.secondary)

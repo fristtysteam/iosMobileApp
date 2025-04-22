@@ -135,15 +135,19 @@ struct ProfileView: View {
                 Button(action: { showEditProfile = true }) {
                     HStack {
                         Image(systemName: "person.fill")
+                            .foregroundColor(.blue)
                         Text("Edit Profile")
+                            .foregroundColor(.primary)
                     }
                 }
 
                 Toggle(isOn: notificationToggleBinding) {
                     HStack {
                         Image(systemName: "bell.fill")
+                            .foregroundColor(.orange)
                         VStack(alignment: .leading) {
                             Text("Notifications")
+                                .foregroundColor(.primary)
                             if !notificationService.isPermissionGranted && notificationService.isEnabled {
                                 Text("Permission required")
                                     .font(.caption)
@@ -158,7 +162,9 @@ struct ProfileView: View {
                 Button(action: { showBadgesSheet = true }) {
                     HStack {
                         Image(systemName: "rosette")
+                            .foregroundColor(.purple)
                         Text("View Badges")
+                            .foregroundColor(.primary)
                         Spacer()
                         if !userBadges.isEmpty {
                             Text("\(userBadges.count) earned")
@@ -180,12 +186,15 @@ struct ProfileView: View {
             }
 
             Section(header: Text("Appearance")) {
-                Button(action: { themeManager.toggleTheme() }) {
+                Toggle(isOn: Binding(
+                    get: { themeManager.colorScheme == .dark },
+                    set: { _ in themeManager.toggleTheme() }
+                )) {
                     HStack {
                         Image(systemName: themeManager.colorScheme == .dark ? "moon.fill" : "sun.max.fill")
+                            .foregroundColor(themeManager.colorScheme == .dark ? .indigo : .orange)
                         Text("Dark Mode")
-                        Spacer()
-                        Image(systemName: themeManager.colorScheme == .dark ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor(.primary)
                     }
                 }
             }
@@ -194,6 +203,7 @@ struct ProfileView: View {
                 Button(action: { showLogoutAlert = true }) {
                     HStack {
                         Image(systemName: "arrow.right.square.fill")
+                            .foregroundColor(.red)
                         Text("Logout")
                             .foregroundColor(.red)
                     }
