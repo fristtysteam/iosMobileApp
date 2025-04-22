@@ -12,6 +12,7 @@ class GoalController: ObservableObject {
     private let authController: AuthController
     private let badgeRepository: BadgeRepository
     private let userRepository: UserRepository
+    private let notificationService = NotificationService.shared
 
     init(goalRepository: GoalRepository, authController: AuthController, badgeRepository: BadgeRepository, userRepository: UserRepository) {
         self.goalRepository = goalRepository
@@ -53,6 +54,7 @@ class GoalController: ObservableObject {
             )
 
             try await goalRepository.saveGoal(newGoal)
+            notificationService.notifyGoalCreated(goal: newGoal)
             await loadGoals()
             return newGoal.id
         } catch {
@@ -68,6 +70,7 @@ class GoalController: ObservableObject {
         do {
             try await goalRepository.saveGoal(goal)
             await loadGoals()
+            isLoading = false
             return true
         } catch {
             errorMessage = "Failed to update goal: \(error.localizedDescription)"
@@ -81,7 +84,9 @@ class GoalController: ObservableObject {
         isLoading = true
         do {
             try await goalRepository.deleteGoal(goal)
+            notificationService.notifyGoalDeleted(goal: goal)
             await loadGoals()
+            isLoading = false
             return true
         } catch {
             errorMessage = "Failed to delete goal: \(error.localizedDescription)"
