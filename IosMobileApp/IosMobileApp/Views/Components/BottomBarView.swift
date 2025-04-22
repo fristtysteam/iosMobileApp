@@ -30,36 +30,9 @@ struct BottomBarView: View {
                 currentTab: currentTab,
                 action: { currentTab = 2 }
             )
-            
-            Menu {
-                Button("Settings", action: {})
-                Button("Help", action: {})
-                Button("Logout", role: .destructive) {
-                    showLogoutAlert = true
-                }
-            } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "ellipsis.circle")
-                    Text("More")
-                }
-                .frame(maxHeight: .infinity)
-                .frame(maxWidth: .infinity)
-                .foregroundColor(
-                    currentTab > 2 ? .blue : .primary
-                )
-            }
         }
         .frame(height: 70)
         .background(Color(.systemBackground).ignoresSafeArea(edges: .bottom))
-        .shadow(radius: 3)
-        .alert("Logout", isPresented: $showLogoutAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Logout", role: .destructive) {
-                authController.logout()
-            }
-        } message: {
-            Text("Are you sure you want to logout?")
-        }
     }
 }
 
@@ -80,7 +53,7 @@ struct BottomBarItem: View {
             }
             .frame(maxHeight: .infinity)
             .frame(maxWidth: .infinity)
-            .foregroundColor(tabIndex == currentTab ? .blue : .primary)
+            .foregroundColor(tabIndex == currentTab ? .gray : .primary)
         }
     }
 }

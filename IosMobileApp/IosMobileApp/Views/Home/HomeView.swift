@@ -14,10 +14,7 @@ struct HomeView: View {
                 HeaderView(title: "Achievr", useGradient: true)
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Welcome back, \(authController.currentUser?.username ?? "User")! 👋")
-                        .font(.largeTitle.bold())
-                    Text(Date(), style: .date)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(.title.bold())
                 }
                 .padding(.horizontal)
 
@@ -110,7 +107,7 @@ struct ProgressBox: View {
         VStack {
             Text(value)
                 .font(.title.bold())
-                .foregroundColor(.blue)
+                .foregroundColor(.black)
             Text(title)
                 .font(.caption)
                 .foregroundColor(.secondary)

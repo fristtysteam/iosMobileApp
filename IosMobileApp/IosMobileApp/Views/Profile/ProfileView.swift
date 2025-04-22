@@ -4,7 +4,6 @@ import Combine
 
 struct ProfileView: View {
     @State private var notificationsEnabled = false
-    @State private var dataSharingEnabled = false
     @State private var showEditProfile = false
     @State private var showLogoutAlert = false
     
@@ -72,13 +71,6 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "bell.fill")
                                 Text("Notifications")
-                            }
-                        }
-                        
-                        Toggle(isOn: $dataSharingEnabled) {
-                            HStack {
-                                Image(systemName: "chart.bar.fill")
-                                Text("Data Sharing")
                             }
                         }
                     }

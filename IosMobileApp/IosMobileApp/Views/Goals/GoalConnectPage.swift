@@ -78,15 +78,6 @@ struct GoalConnectPage: View {
                         }
                     }
 
-                    // Motivational section
-                    VStack(spacing: 16) {
-                        Text("Daily Inspiration")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 24)
-                    }
-                    .padding(.top, 8)
                 }
                 .padding(.bottom, 80)
             }
@@ -116,9 +107,11 @@ struct GoalConnectPage: View {
 
 struct RecentGoalCard: View {
     let goal: Goal
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
+            // Title and completion status
             HStack {
                 Text(goal.title)
                     .font(.headline)
@@ -130,21 +123,75 @@ struct RecentGoalCard: View {
                 }
             }
             
-            if let category = goal.category {
-                Label(category, systemImage: "tag")
+            // Progress section
+            VStack(alignment: .leading, spacing: 8) {
+                ProgressView(value: goal.progress)
+                    .tint(
+                        LinearGradient(
+                            colors: [.gray.opacity(0.6), .gray],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                
+                Text("\(Int(goal.progress * 100))% Complete")
                     .font(.caption)
-                    .foregroundColor(.blue)
+                    .foregroundColor(.secondary)
             }
             
-            ProgressView(value: goal.progress)
-                .tint(goal.isCompleted ? .green : .blue)
+            Divider()
+            
+            // Category and deadline
+            VStack(alignment: .leading, spacing: 8) {
+                if let category = goal.category {
+                    HStack(spacing: 6) {
+                        Image(systemName: "tag.fill")
+                            .font(.caption)
+                        Text(category)
+                            .font(.caption)
+                    }
+                    .foregroundColor(.secondary)
+                }
+                
+                if let deadline = goal.deadline {
+                    HStack(spacing: 6) {
+                        Image(systemName: "calendar")
+                            .font(.caption)
+                        Text(deadline.formatted(.dateTime.month().day()))
+                            .font(.caption)
+                    }
+                    .foregroundColor(.secondary)
+                }
+            }
         }
         .padding()
         .frame(width: 280)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemBackground))
+            ZStack {
+                // Main card background
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.secondarySystemBackground))
+                
+                // Bottom folding effect
+                VStack {
+                    Spacer()
+                    LinearGradient(
+                        colors: [
+                            colorScheme == .dark ? .black.opacity(0.3) : .white.opacity(0.3),
+                            colorScheme == .dark ? .black.opacity(0.1) : .white.opacity(0.1)
+                        ],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    .frame(height: 40)
+                }
+                .clipShape(
+                    RoundedRectangle(cornerRadius: 16)
+                )
+            }
         )
+        .shadow(color: colorScheme == .dark ? .clear : .black.opacity(0.05),
+                radius: 8, x: 0, y: 4)
     }
 }
 
