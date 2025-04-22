@@ -3,10 +3,10 @@ import GRDB
 import Combine
 
 struct ProfileView: View {
-    @State private var notificationsEnabled = false
     @State private var dataSharingEnabled = false
     @State private var showEditProfile = false
     @State private var showLogoutAlert = false
+    @State private var showNotificationPermissionAlert = false
     
     // Observer for forcing view refresh when data changes
     @State private var viewRefreshCounter = 0
@@ -14,6 +14,7 @@ struct ProfileView: View {
     @EnvironmentObject var authController: AuthController
     @EnvironmentObject var userController: UserController
     @EnvironmentObject var themeManager: ThemeManager
+    @StateObject private var notificationService = NotificationService.shared
     
     // Current user data derived from authController for binding in views
     private var username: String { 
@@ -32,83 +33,26 @@ struct ProfileView: View {
         return UIImage(data: imageData)
     }
     
+    private var notificationToggleBinding: Binding<Bool> {
+        Binding(
+            get: { notificationService.isEnabled },
+            set: { newValue in
+                if newValue && !notificationService.isPermissionGranted {
+                    showNotificationPermissionAlert = true
+                }
+                notificationService.toggleNotifications(newValue)
+            }
+        )
+    }
+    
     var body: some View {
         NavigationView {
             VStack(alignment: .leading, spacing: 20) {
-                // Profile Header with ID for refresh
-                HStack {
-                    // Use the viewRefreshCounter for forcing refresh
-                    CircleImage(image: profileImage, size: 80)
-                        .padding()
-                        .id("profile-img-\(viewRefreshCounter)")
-                    
-                    VStack(alignment: .leading) {
-                        Text(username)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .id("username-\(viewRefreshCounter)")
-                        
-                        Text(email)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                            .id("email-\(viewRefreshCounter)")
-                    }
-                    .padding(.leading)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-                
-                // Settings Section
-                List {
-                    Section(header: Text("Account")) {
-                        Button(action: { showEditProfile = true }) {
-                            HStack {
-                                Image(systemName: "person.fill")
-                                Text("Edit Profile")
-                            }
-                        }
-                        
-                        Toggle(isOn: $notificationsEnabled) {
-                            HStack {
-                                Image(systemName: "bell.fill")
-                                Text("Notifications")
-                            }
-                        }
-                        
-                        Toggle(isOn: $dataSharingEnabled) {
-                            HStack {
-                                Image(systemName: "chart.bar.fill")
-                                Text("Data Sharing")
-                            }
-                        }
-                    }
-                    
-                    Section(header: Text("Appearance")) {
-                        Button(action: { themeManager.toggleTheme() }) {
-                            HStack {
-                                Image(systemName: themeManager.colorScheme == .dark ? "moon.fill" : "sun.max.fill")
-                                Text("Dark Mode")
-                                Spacer()
-                                Image(systemName: themeManager.colorScheme == .dark ? "checkmark.circle.fill" : "circle")
-                            }
-                        }
-                    }
-                    
-                    Section {
-                        Button(action: { showLogoutAlert = true }) {
-                            HStack {
-                                Image(systemName: "arrow.right.square.fill")
-                                Text("Logout")
-                                    .foregroundColor(.red)
-                            }
-                        }
-                    }
-                }
-                .listStyle(InsetGroupedListStyle())
+                profileHeader
+                settingsList
             }
             .navigationTitle("Profile")
             .sheet(isPresented: $showEditProfile, onDismiss: {
-                // Completely refresh the view after editing
                 refreshProfileData()
             }) {
                 EditProfileView(
@@ -116,6 +60,18 @@ struct ProfileView: View {
                     currentEmail: email,
                     currentProfileImage: profileImage
                 )
+            }
+            .alert("Enable Notifications", isPresented: $showNotificationPermissionAlert) {
+                Button("Cancel") {
+                    notificationService.toggleNotifications(false)
+                }
+                Button("Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+            } message: {
+                Text("Please enable notifications in Settings to receive goal updates.")
             }
             .alert("Logout", isPresented: $showLogoutAlert) {
                 Button("Cancel", role: .cancel) { }
@@ -126,22 +82,95 @@ struct ProfileView: View {
                 Text("Are you sure you want to logout?")
             }
             .onAppear {
-                // Refresh when the view appears
                 refreshProfileData()
             }
         }
     }
     
-    // Strong refresh method that forces a complete data reload
+    private var profileHeader: some View {
+        HStack {
+            CircleImage(image: profileImage, size: 80)
+                .padding()
+                .id("profile-img-\(viewRefreshCounter)")
+            
+            VStack(alignment: .leading) {
+                Text(username)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .id("username-\(viewRefreshCounter)")
+                
+                Text(email)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .id("email-\(viewRefreshCounter)")
+            }
+            .padding(.leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal)
+    }
+    
+    private var settingsList: some View {
+        List {
+            Section(header: Text("Account")) {
+                Button(action: { showEditProfile = true }) {
+                    HStack {
+                        Image(systemName: "person.fill")
+                        Text("Edit Profile")
+                    }
+                }
+                
+                Toggle(isOn: notificationToggleBinding) {
+                    HStack {
+                        Image(systemName: "bell.fill")
+                        VStack(alignment: .leading) {
+                            Text("Notifications")
+                            if !notificationService.isPermissionGranted && notificationService.isEnabled {
+                                Text("Permission required")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                }
+                
+                Toggle(isOn: $dataSharingEnabled) {
+                    HStack {
+                        Image(systemName: "chart.bar.fill")
+                        Text("Data Sharing")
+                    }
+                }
+            }
+            
+            Section(header: Text("Appearance")) {
+                Button(action: { themeManager.toggleTheme() }) {
+                    HStack {
+                        Image(systemName: themeManager.colorScheme == .dark ? "moon.fill" : "sun.max.fill")
+                        Text("Dark Mode")
+                        Spacer()
+                        Image(systemName: themeManager.colorScheme == .dark ? "checkmark.circle.fill" : "circle")
+                    }
+                }
+            }
+            
+            Section {
+                Button(action: { showLogoutAlert = true }) {
+                    HStack {
+                        Image(systemName: "arrow.right.square.fill")
+                        Text("Logout")
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+        }
+        .listStyle(InsetGroupedListStyle())
+    }
+    
     private func refreshProfileData() {
         Task {
-            // First load new data from database
             await authController.refreshCurrentUser()
-            
-            // Then force UI update on the main thread
             await MainActor.run {
                 print("Refreshing profile view with new data!")
-                // Increment refresh counter to force SwiftUI to rebuild the views
                 viewRefreshCounter += 1
             }
         }
