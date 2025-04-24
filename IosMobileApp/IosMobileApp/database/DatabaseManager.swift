@@ -72,7 +72,7 @@ final class DatabaseManager {
             }
 
             // UserBadge table - renamed to match model
-            try db.create(table: "userBadge", ifNotExists: true) { t in
+            try db.create(table: "user_badge", ifNotExists: true) { t in
                 t.column("userId", .text).notNull()
                 t.column("badgeId", .text).notNull()
                 t.column("dateEarned", .datetime).notNull()
@@ -103,11 +103,11 @@ final class DatabaseManager {
         guard badgeCount == 0 else { return }
         
         let defaultBadges = [
-                Badge(id: "beginner", name: "Beginner", description: "Completed 1 goal", imageName: "badge.beginner", goalCountRequired: 1),
-                Badge(id: "achiever", name: "Achiever", description: "Completed 5 goals", imageName: "badge.achiever", goalCountRequired: 5),
-                Badge(id: "expert", name: "Expert", description: "Completed 10 goals", imageName: "badge.expert", goalCountRequired: 10),
-                Badge(id: "master", name: "Master", description: "Completed 25 goals", imageName: "badge.master", goalCountRequired: 25),
-                Badge(id: "legend", name: "Legend", description: "Completed 50 goals", imageName: "badge.legend", goalCountRequired: 50)
+                Badge(id: "beginner", name: "Beginner", description: "Completed 1 goal", imageName: "beginner", goalCountRequired: 1),
+                Badge(id: "achiever", name: "Achiever", description: "Completed 5 goals", imageName: "achiever", goalCountRequired: 5),
+                Badge(id: "expert", name: "Expert", description: "Completed 10 goals", imageName: "EXPERT", goalCountRequired: 10),
+                Badge(id: "master", name: "Master", description: "Completed 25 goals", imageName: "master", goalCountRequired: 25),
+                Badge(id: "legend", name: "Legend", description: "Completed 50 goals", imageName: "legend", goalCountRequired: 50)
             ]
             
             try dbQueue?.write { db in

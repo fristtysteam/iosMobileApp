@@ -15,54 +15,100 @@ struct BadgeDetailView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: badge.imageName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 120, height: 120)
-                .foregroundColor(isEarned ? .purple : .gray)
-                .opacity(isEarned ? 1.0 : 0.3)
-            
-            Text(badge.name)
-                .font(.title)
-                .bold()
-                .foregroundColor(isEarned ? .primary : .secondary)
-            
-            Text(badge.description)
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-                .foregroundColor(isEarned ? .primary : .secondary)
+        VStack(spacing: 24) {
+            ZStack {
+                Image(badge.imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 180, height: 180)
+                    .saturation(isEarned ? 1 : 0)
+                    .opacity(isEarned ? 1 : 0.3)
+                
+                if !isEarned {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 60))
+                        .foregroundColor(.gray)
+                        .background(
+                            Circle()
+                                .fill(Color(.systemBackground))
+                                .frame(width: 80, height: 80)
+                        )
+                }
+            }
             
             VStack(spacing: 8) {
-                Text("Requirements")
-                    .font(.headline)
-                    .foregroundColor(.secondary)
+                Text(badge.name)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(isEarned ? .primary : .secondary)
                 
-                Text("Complete \(badge.goalCountRequired) goals")
-                    .font(.subheadline)
+                Text(badge.description)
+                    .font(.body)
+                    .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
+                    .padding(.horizontal)
+            }
+            
+            VStack(spacing: 16) {
+                if isEarned {
+                    earnedBadgeInfo
+                } else {
+                    lockedBadgeInfo
+                }
             }
             .padding(.top)
-            
-            if isEarned {
-                if let dateEarned = dateEarned {
-                    Text("Earned on: \(dateEarned.formatted(date: .long, time: .omitted))")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.top)
-                }
-            } else {
-                Text("Not yet earned")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.top)
-            }
             
             Spacer()
         }
         .padding()
         .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    private var earnedBadgeInfo: some View {
+        VStack(spacing: 12) {
+            Label("Badge Earned!", systemImage: "checkmark.circle.fill")
+                .font(.headline)
+                .foregroundColor(.green)
+            
+            if let dateEarned = dateEarned {
+                Text("Earned on: \(dateEarned.formatted(date: .long, time: .omitted))")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5)
+    }
+    
+    private var lockedBadgeInfo: some View {
+        VStack(spacing: 16) {
+            VStack(spacing: 8) {
+                Text("Requirements to Unlock")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                
+                Text("Complete \(badge.goalCountRequired) goals")
+                    .font(.body)
+                    .foregroundColor(.primary)
+            }
+            
+            VStack(spacing: 8) {
+                Text("Keep Going!")
+                    .font(.headline)
+                    .foregroundColor(.purple)
+                
+                Text("Complete more goals to unlock this badge")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5)
     }
 }
 
@@ -70,20 +116,11 @@ struct BadgeDetailView: View {
     let dbQueue = try! DatabaseQueue()
     let badgeRepository = BadgeRepository(dbQueue: dbQueue)
     
-    // Create a test badge
-    let testBadge = Badge(
-        id: "test",
-        name: "Test Badge",
-        description: "This is a test badge",
-        imageName: "star.fill",
-        goalCountRequired: 5
-    )
-    
-    NavigationView {
+    return NavigationView {
         BadgeDetailView(
-            badge: testBadge,
-            isEarned: true,
-            dateEarned: Date()
+            badge: Badge.allBadges[0],
+            isEarned: false,
+            dateEarned: nil
         )
     }
 } 

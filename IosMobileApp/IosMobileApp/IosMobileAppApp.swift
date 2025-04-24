@@ -7,9 +7,11 @@ struct IosMobileAppApp: App {
     private let userRepository: UserRepository
     private let goalRepository: GoalRepository
     private let quoteRepository: QuoteRepository
+    private let badgeRepository: BadgeRepository
     private let authController: AuthController
     private let goalController: GoalController
     private let userController: UserController
+    private let badgeController: BadgeController
     @StateObject private var themeManager = ThemeManager()
     
     #if DEBUG
@@ -20,27 +22,24 @@ struct IosMobileAppApp: App {
     #endif
     
     // Initialize everything
-    // Update the init in your App struct
     init() {
         let dbQueue = databaseManager.getDatabase()
-        userRepository = UserRepository(dbQueue: dbQueue)
-        goalRepository = GoalRepository(dbQueue: dbQueue)
-        quoteRepository = QuoteRepository(dbQueue: dbQueue)
-        let badgeRepository = BadgeRepository(dbQueue: dbQueue)
         
-        // Initialize badges if needed
-        Task {
-            try await badgeRepository.initializeBadges()
-        }
+        // Initialize repositories first
+        self.userRepository = UserRepository(dbQueue: dbQueue)
+        self.goalRepository = GoalRepository(dbQueue: dbQueue)
+        self.quoteRepository = QuoteRepository(dbQueue: dbQueue)
+        self.badgeRepository = BadgeRepository(dbQueue: dbQueue)
         
-        authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
-        goalController = GoalController(
+        // Initialize controllers after repositories
+        self.authController = AuthController(userRepository: userRepository, goalRepository: goalRepository)
+        self.badgeController = BadgeController(badgeRepository: badgeRepository, userRepository: userRepository)
+        self.goalController = GoalController(
             goalRepository: goalRepository,
             authController: authController,
-            badgeRepository: badgeRepository,
-            userRepository: userRepository
+            badgeController: badgeController
         )
-        userController = UserController(userRepository: userRepository, authController: authController)
+        self.userController = UserController(userRepository: userRepository, authController: authController)
     }
     
     #if DEBUG
@@ -123,12 +122,15 @@ struct IosMobileAppApp: App {
                     .environmentObject(goalController)
                     .environmentObject(userController)
                     .environmentObject(themeManager)
+                    .environmentObject(badgeController)
                     .preferredColorScheme(themeManager.colorScheme)
                     .task {
                         if isFirstLaunch {
                             isFirstLaunch = false
                             await setupTestData()
                         }
+                        // Initialize badges after view appears
+                        try? await badgeRepository.initializeBadges()
                     }
             } else {
                 AuthView()
@@ -139,7 +141,12 @@ struct IosMobileAppApp: App {
                     .environmentObject(goalController)
                     .environmentObject(userController)
                     .environmentObject(themeManager)
+                    .environmentObject(badgeController)
                     .preferredColorScheme(themeManager.colorScheme)
+                    .task {
+                        // Initialize badges after view appears
+                        try? await badgeRepository.initializeBadges()
+                    }
             }
             #else
             ContentView()
@@ -150,7 +157,12 @@ struct IosMobileAppApp: App {
                 .environmentObject(goalController)
                 .environmentObject(userController)
                 .environmentObject(themeManager)
+                .environmentObject(badgeController)
                 .preferredColorScheme(themeManager.colorScheme)
+                .task {
+                    // Initialize badges after view appears
+                    try? await badgeRepository.initializeBadges()
+                }
             #endif
         }
     }

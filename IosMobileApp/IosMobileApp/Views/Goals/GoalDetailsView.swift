@@ -474,6 +474,12 @@ struct GoalDetailsView: View {
         var updatedGoal = goal
         updatedGoal.isCompleted.toggle()
         
+        // Set progress to 100% when completing, keep existing progress when uncompleting
+        if updatedGoal.isCompleted {
+            updatedGoal.progress = 1.0
+            editedProgress = 1.0
+        }
+        
         Task {
             if await goalController.updateGoal(updatedGoal) {
                 showToast(

@@ -10,15 +10,13 @@ class GoalController: ObservableObject {
 
     private let goalRepository: GoalRepository
     private let authController: AuthController
-    private let badgeRepository: BadgeRepository
-    private let userRepository: UserRepository
+    private let badgeController: BadgeController
     private let notificationService = NotificationService.shared
 
-    init(goalRepository: GoalRepository, authController: AuthController, badgeRepository: BadgeRepository, userRepository: UserRepository) {
+    init(goalRepository: GoalRepository, authController: AuthController, badgeController: BadgeController) {
         self.goalRepository = goalRepository
         self.authController = authController
-        self.badgeRepository = badgeRepository
-        self.userRepository = userRepository
+        self.badgeController = badgeController
     }
 
     func loadGoals() async {
@@ -68,8 +66,21 @@ class GoalController: ObservableObject {
     func updateGoal(_ goal: Goal) async -> Bool {
         isLoading = true
         do {
-            try await goalRepository.saveGoal(goal)
+            var updatedGoal = goal
+            
+            // Ensure progress is 100% when goal is marked as complete
+            if updatedGoal.isCompleted {
+                updatedGoal.progress = 1.0
+            }
+            
+            try await goalRepository.saveGoal(updatedGoal)
             await loadGoals()
+            
+            // Check for badges if the goal is completed
+            if updatedGoal.isCompleted, let userId = authController.currentUser?.id {
+                await badgeController.checkAndAwardBadges(for: userId)
+            }
+            
             isLoading = false
             return true
         } catch {
@@ -145,41 +156,13 @@ class GoalController: ObservableObject {
             completedGoal.progress = 1.0
 
             try await goalRepository.saveGoal(completedGoal)
-
-            let completedCount = try await userRepository.getCompletedGoalsCount(userId: currentUserId)
-
-            let newBadges = try await badgeRepository.checkForNewBadges(
-                userId: currentUserId,
-                completedGoalsCount: completedCount
-            )
-
-            for badge in newBadges {
-                try await badgeRepository.awardBadge(userId: currentUserId, badgeId: badge.id)
-                showBadgeCelebration(badge: badge)
-            }
-
+            await badgeController.checkAndAwardBadges(for: currentUserId)
             await loadGoals()
             return true
         } catch {
             errorMessage = "Failed to complete goal: \(error.localizedDescription)"
             showError = true
             return false
-        }
-    }
-
-    private func showBadgeCelebration(badge: Badge) {
-        DispatchQueue.main.async {
-            let alert = UIAlertController(
-                title: "New Badge Earned!",
-                message: "You've earned the \(badge.name) badge: \(badge.description)",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let rootViewController = windowScene.windows.first?.rootViewController {
-                rootViewController.present(alert, animated: true)
-            }
         }
     }
 
