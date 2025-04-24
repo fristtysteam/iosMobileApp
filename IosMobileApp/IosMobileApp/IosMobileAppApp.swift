@@ -17,6 +17,8 @@ struct IosMobileAppApp: App {
     private let isDevelopmentMode = false
     private let testUserId = UUID()
     @State private var isFirstLaunch = true
+    @State private var showSplash = true
+
     #endif
     
     // Initialize everything
@@ -113,8 +115,45 @@ struct IosMobileAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            #if DEBUG
-            if isDevelopmentMode {
+            if showSplash {
+                SplashScreen()
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation {
+                                showSplash = false
+                            }
+                        }
+                    }
+            } else {
+                #if DEBUG
+                if isDevelopmentMode {
+                    ContentView()
+                        .environmentObject(authController)
+                        .environmentObject(userRepository)
+                        .environmentObject(goalRepository)
+                        .environmentObject(quoteRepository)
+                        .environmentObject(goalController)
+                        .environmentObject(userController)
+                        .environmentObject(themeManager)
+                        .preferredColorScheme(themeManager.colorScheme)
+                        .task {
+                            if isFirstLaunch {
+                                isFirstLaunch = false
+                                await setupTestData()
+                            }
+                        }
+                } else {
+                    AuthView()
+                        .environmentObject(authController)
+                        .environmentObject(userRepository)
+                        .environmentObject(goalRepository)
+                        .environmentObject(quoteRepository)
+                        .environmentObject(goalController)
+                        .environmentObject(userController)
+                        .environmentObject(themeManager)
+                        .preferredColorScheme(themeManager.colorScheme)
+                }
+                #else
                 ContentView()
                     .environmentObject(authController)
                     .environmentObject(userRepository)
@@ -124,34 +163,9 @@ struct IosMobileAppApp: App {
                     .environmentObject(userController)
                     .environmentObject(themeManager)
                     .preferredColorScheme(themeManager.colorScheme)
-                    .task {
-                        if isFirstLaunch {
-                            isFirstLaunch = false
-                            await setupTestData()
-                        }
-                    }
-            } else {
-                AuthView()
-                    .environmentObject(authController)
-                    .environmentObject(userRepository)
-                    .environmentObject(goalRepository)
-                    .environmentObject(quoteRepository)
-                    .environmentObject(goalController)
-                    .environmentObject(userController)
-                    .environmentObject(themeManager)
-                    .preferredColorScheme(themeManager.colorScheme)
+                #endif
             }
-            #else
-            ContentView()
-                .environmentObject(authController)
-                .environmentObject(userRepository)
-                .environmentObject(goalRepository)
-                .environmentObject(quoteRepository)
-                .environmentObject(goalController)
-                .environmentObject(userController)
-                .environmentObject(themeManager)
-                .preferredColorScheme(themeManager.colorScheme)
-            #endif
         }
+
     }
 }
