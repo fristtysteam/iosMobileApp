@@ -3,4 +3,52 @@
    uuid = "6B717F34-BE7C-432D-A17B-1D5724003D85"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "59242F3D-1E32-4339-B429-AF22891C6535"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "IosMobileApp/Views/BadgeCollectionView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "4"
+            endingLineNumber = "4"
+            landmarkName = "BadgeCollectionView"
+            landmarkType = "14">
+            <Locations>
+               <Location
+                  uuid = "59242F3D-1E32-4339-B429-AF22891C6535 - 2da0a9942aa015f8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "property wrapper backing initializer of IosMobileApp.BadgeCollectionView.allBadges : Swift.Array&lt;IosMobileApp.Badge&gt;"
+                  moduleName = "IosMobileApp.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/student/Documents/iosMobileApp/IosMobileApp/IosMobileApp/Views/BadgeCollectionView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0">
+               </Location>
+               <Location
+                  uuid = "59242F3D-1E32-4339-B429-AF22891C6535 - 1d0b5f39b252d485"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "IosMobileApp.BadgeCollectionView.init(badgeRepository: IosMobileApp.BadgeRepository, userId: Foundation.UUID) -&gt; IosMobileApp.BadgeCollectionView"
+                  moduleName = "IosMobileApp.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/student/Documents/iosMobileApp/IosMobileApp/IosMobileApp/Views/BadgeCollectionView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "4"
+                  endingLineNumber = "4">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
