@@ -248,5 +248,15 @@ class UserRepository: ObservableObject {
         }
     }
     
-    
+    func getUserBadges(userId: UUID) async throws -> [Badge] {
+        return try await database.read { db in
+            try Badge
+                .filter(sql: """
+                    id IN (
+                        SELECT badgeId FROM userbadge WHERE userId = ?
+                    )
+                """, arguments: [userId.uuidString])
+                .fetchAll(db)
+        }
+    }
 }

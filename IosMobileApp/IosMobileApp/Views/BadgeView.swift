@@ -1,47 +1,39 @@
-//
-//  BadgeView.swift
-//  IosMobileApp
-//
-//  Created by Student on 22/04/2025.
-//
-
-
 import SwiftUI
 
 struct BadgeView: View {
     let badge: Badge
     let isEarned: Bool
     let size: CGFloat
-
-    init(badge: Badge, isEarned: Bool, size: CGFloat = 60) {
-        self.badge = badge
-        self.isEarned = isEarned
-        self.size = size
-    }
-
+    
     var body: some View {
         VStack(spacing: 4) {
-            Image(systemName: badge.imageName)
-                .font(.system(size: size * 0.6))
-                .frame(width: size, height: size)
-                .background(isEarned ? Color.yellow : Color.gray.opacity(0.2))
-                .foregroundColor(isEarned ? .white : .gray)
-                .clipShape(Circle())
-                .overlay(
-                    Circle()
-                        .stroke(isEarned ? Color.yellow : Color.gray, lineWidth: 2)
-                )
-
+            // Badge icon
+            ZStack {
+                Circle()
+                    .fill(isEarned ? Color.yellow.opacity(0.3) : Color.gray.opacity(0.1))
+                    .frame(width: size, height: size)
+                
+                Image(systemName: badge.imageName)
+                    .font(.system(size: size * 0.5))
+                    .foregroundColor(isEarned ? .yellow : .gray)
+                    .shadow(color: isEarned ? .yellow : .clear, radius: 5)
+            }
+            .overlay(
+                Circle()
+                    .stroke(isEarned ? Color.yellow : Color.gray, lineWidth: 2)
+            )
+            
+            // Badge name
             Text(badge.name)
-                .font(.caption)
+                .font(.system(size: size * 0.15))
                 .fontWeight(.medium)
                 .lineLimit(1)
                 .frame(width: size + 20)
-                .multilineTextAlignment(.center)
-
+            
+            // Requirements (only show if not earned)
             if !isEarned {
-                Text("Complete \(badge.goalCountRequired) goals")
-                    .font(.caption)
+                Text("\(badge.goalCountRequired) goals")
+                    .font(.system(size: size * 0.12))
                     .foregroundColor(.gray)
             }
         }

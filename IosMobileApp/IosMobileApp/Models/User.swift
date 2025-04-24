@@ -9,6 +9,14 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
     var goals: [Goal] = []
     var profilePictureData: Data?
     
+    
+    var userId: String
+    var badgeId: String
+    var dateEarned: Date
+    
+    static let databaseTableName = "userBadge"
+    static let badge = belongsTo(Badge.self)
+    
     init(id: UUID = UUID(), username: String, email: String, password: String, goals: [Goal] = [], profilePictureData: Data? = nil) {
         self.id = id
         self.username = username

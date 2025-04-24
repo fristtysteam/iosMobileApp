@@ -177,7 +177,10 @@ struct ProfileView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 15) {
                             ForEach(userBadges.prefix(5)) { badge in
-                                BadgeView(badge: badge, isEarned: true, size: 50)
+                                NavigationLink(destination: BadgeDetailView(badge: badge)) {
+                                    BadgeView(badge: badge, isEarned: true, size: 50)
+                                }
+                                .buttonStyle(PlainButtonStyle()) // Optional: removes the blue highlight on tap
                             }
                         }
                         .padding(.vertical, 4)

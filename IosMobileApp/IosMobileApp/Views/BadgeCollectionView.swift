@@ -1,91 +1,90 @@
 import SwiftUI
 
 struct BadgeCollectionView: View {
-    @State private var allBadges: [Badge] = []
-    @State private var earnedBadgeIds: [String] = []
-    @State private var selectedBadge: Badge?
-    @State private var isLoading = true
-    
-    let badgeRepository: BadgeRepository
-    let userId: UUID
-    
+    @EnvironmentObject var userRepository: UserRepository
+    @EnvironmentObject var authController: AuthController
+    @State private var earnedBadges: [Badge] = []
+    private let allBadges = Badge.allBadges
+
     var body: some View {
-        Group {
-            if isLoading {
-                ProgressView("Loading badges...")
-            } else {
-                ScrollView {
-                    VStack {
-                        // Debug info
-                        Text("All Badges: \(allBadges.count)")
-                        Text("Earned Badges: \(earnedBadgeIds.count)")
-                        
-                        let earnedCount = earnedBadgeIds.count
-                        let totalCount = allBadges.count
-                        let progress = totalCount > 0 ? Double(earnedCount) / Double(totalCount) : 0
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Your Badge Progress")
+                .font(.title)
+                .bold()
 
-                        VStack {
-                            Text("Badge Progress")
-                                .font(.headline)
-                            ProgressView(value: progress)
-                                .padding(.horizontal)
-                            Text("\(earnedCount) of \(totalCount) badges earned")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding()
+            BadgeProgressBar(earnedCount: earnedBadges.count, totalCount: allBadges.count)
 
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 20) {
-                            ForEach(allBadges) { badge in
-                                Button(action: {
-                                    selectedBadge = badge
-                                }) {
-                                    BadgeView(
-                                        badge: badge,
-                                        isEarned: earnedBadgeIds.contains(badge.id)
-                                    )
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                            }
-                        }
-                        .padding(.bottom)
+            Text("Badges")
+                .font(.headline)
+                .padding(.top)
+
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 20) {
+                    ForEach(allBadges) { badge in
+                        BadgeItemView(badge: badge, isEarned: earnedBadges.contains(where: { $0.id == badge.id }))
                     }
                 }
+                .padding(.horizontal)
             }
         }
+        .padding()
         .task {
-            await loadBadges()
-        }
-        .sheet(item: $selectedBadge) { badge in
-            BadgeDetailView(
-                badge: badge,
-                isEarned: earnedBadgeIds.contains(badge.id),
-                dateEarned: earnedBadgeIds.contains(badge.id) ? Date() : nil
-            )
+            await loadEarnedBadges()
         }
     }
-    
-    private func loadBadges() async {
+
+    private func loadEarnedBadges() async {
+        guard let currentUser = authController.currentUser else { return }
         do {
-            allBadges = try await badgeRepository.getAllBadges()
-            let earnedBadges = try await badgeRepository.getBadgesForUser(userId: userId)
-            earnedBadgeIds = earnedBadges.map { $0.id }
-            isLoading = false
+            let badges = try await userRepository.getUserBadges(userId: currentUser.id)
+            earnedBadges = badges
         } catch {
-            print("Error loading badges: \(error)")
-            isLoading = false
+            print("Failed to load badges: \(error)")
         }
     }
 }
 
-struct BadgeCollectionView_Previews: PreviewProvider {
-    static var previews: some View {
-        let dbQueue = DatabaseManager.shared.getDatabase()
-        let badgeRepository = BadgeRepository(dbQueue: dbQueue)
-        
-        return BadgeCollectionView(
-            badgeRepository: badgeRepository,
-            userId: UUID() // Use a test UUID for preview
-        )
+// MARK: - Progress Bar View
+
+struct BadgeProgressBar: View {
+    let earnedCount: Int
+    let totalCount: Int
+
+    var body: some View {
+        let progress: Double = totalCount > 0 ? Double(earnedCount) / Double(totalCount) : 0
+
+        VStack(alignment: .leading) {
+            ProgressView(value: progress)
+                .progressViewStyle(LinearProgressViewStyle())
+            Text("\(earnedCount) of \(totalCount) badges earned")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+        }
+    }
+}
+
+// MARK: - Badge Item View
+
+struct BadgeItemView: View {
+    let badge: Badge
+    let isEarned: Bool
+
+    var body: some View {
+        VStack {
+            Image(systemName: badge.imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 60, height: 60)
+                .foregroundColor(isEarned ? .accentColor : .gray)
+                .opacity(isEarned ? 1.0 : 0.3)
+
+            Text(badge.name)
+                .font(.caption)
+                .fontWeight(isEarned ? .bold : .regular)
+        }
+        .padding()
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 2)
     }
 }

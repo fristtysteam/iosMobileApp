@@ -128,6 +128,24 @@ class GoalController: ObservableObject {
             return false
         }
     }
+    
+    
+    private func showBadgeCelebration(badge: Badge) {
+            DispatchQueue.main.async {
+                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                      let rootViewController = windowScene.windows.first?.rootViewController else {
+                    return
+                }
+                
+                let alert = UIAlertController(
+                    title: "New Badge Earned!",
+                    message: "You've earned the \(badge.name) badge: \(badge.description)",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                rootViewController.present(alert, animated: true)
+            }
+        }
 
     func completeGoal(goal: Goal) async -> Bool {
         isLoading = true
@@ -140,21 +158,27 @@ class GoalController: ObservableObject {
                 return false
             }
 
+            // Mark goal as completed
             var completedGoal = goal
             completedGoal.isCompleted = true
             completedGoal.progress = 1.0
-
             try await goalRepository.saveGoal(completedGoal)
 
+            // Get updated completed goals count
             let completedCount = try await userRepository.getCompletedGoalsCount(userId: currentUserId)
+            print("✅ Completed goals count: \(completedCount)") // Debug log
 
+            // Check for new badges
             let newBadges = try await badgeRepository.checkForNewBadges(
                 userId: currentUserId,
                 completedGoalsCount: completedCount
             )
+            print("🛠 Found \(newBadges.count) eligible badges") // Debug log
 
+            // Award new badges
             for badge in newBadges {
                 try await badgeRepository.awardBadge(userId: currentUserId, badgeId: badge.id)
+                print("🏆 Awarded badge: \(badge.name)") // Debug log
                 showBadgeCelebration(badge: badge)
             }
 
@@ -166,23 +190,6 @@ class GoalController: ObservableObject {
             return false
         }
     }
-
-    private func showBadgeCelebration(badge: Badge) {
-        DispatchQueue.main.async {
-            let alert = UIAlertController(
-                title: "New Badge Earned!",
-                message: "You've earned the \(badge.name) badge: \(badge.description)",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let rootViewController = windowScene.windows.first?.rootViewController {
-                rootViewController.present(alert, animated: true)
-            }
-        }
-    }
-
     func clearError() {
         errorMessage = nil
         showError = false
