@@ -32,13 +32,7 @@ struct HeaderView: View {
 
             Spacer()
 
-            // Notification Icon
-            Image(systemName: "bell.fill")
-                .font(.title)
-                .foregroundColor(.black)
-                .onTapGesture {
-                    print("Notification tapped!")
-                }
+          
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
