@@ -145,9 +145,14 @@ struct AddGoalView: View {
                 showToast = true
             }
             
-            // Wait for the toast to show before dismissing
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                onGoalAdded(createdGoalID)
+            // Call onGoalAdded first to set up the next view
+            onGoalAdded(createdGoalID)
+            
+            // Short delay to allow the toast to be visible
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            
+            // Then dismiss this view
+            await MainActor.run {
                 presentationMode.wrappedValue.dismiss()
             }
             

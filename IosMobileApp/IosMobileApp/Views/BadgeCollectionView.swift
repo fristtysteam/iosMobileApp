@@ -42,7 +42,8 @@ struct BadgeCollectionView: View {
                                 }) {
                                     BadgeView(
                                         badge: badge,
-                                        isEarned: earnedBadgeIds.contains(badge.id)
+                                        isEarned: earnedBadgeIds.contains(badge.id),
+                                        size: 60
                                     )
                                 }
                                 .buttonStyle(PlainButtonStyle())

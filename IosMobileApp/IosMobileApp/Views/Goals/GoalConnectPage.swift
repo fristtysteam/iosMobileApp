@@ -83,7 +83,10 @@ struct GoalConnectPage: View {
                 Task {
                     await goalController.loadGoals()
                     selectedGoalID = newGoalID
-                    showingGoalDetails = true
+                    showingAddGoal = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showingGoalDetails = true
+                    }
                 }
             })
         }

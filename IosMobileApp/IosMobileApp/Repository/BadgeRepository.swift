@@ -1,7 +1,11 @@
 import Foundation
 import GRDB
+import SwiftUI
 
-class BadgeRepository {
+@MainActor
+class BadgeRepository: ObservableObject {
+    @Published private(set) var allBadges: [Badge] = []
+    @Published private(set) var isLoading = false
     private let dbQueue: DatabaseQueue
 
     init(dbQueue: DatabaseQueue) {
@@ -10,14 +14,24 @@ class BadgeRepository {
 
     // Fetch all badges from the database
     func getAllBadges() async throws -> [Badge] {
-        try await dbQueue.read { db in
+        isLoading = true
+        defer { isLoading = false }
+        
+        let badges = try await dbQueue.read { db in
             try Badge.fetchAll(db)
         }
+        await MainActor.run {
+            self.allBadges = badges
+        }
+        return badges
     }
 
     // Fetch all badges earned by a specific user
     func getBadgesForUser(userId: UUID) async throws -> [Badge] {
-        try await dbQueue.read { db in
+        isLoading = true
+        defer { isLoading = false }
+        
+        return try await dbQueue.read { db in
             let earnedBadgeIds = try UserBadge
                 .filter(Column("userId") == userId.uuidString) // Convert UUID to String
                 .fetchAll(db)
@@ -29,7 +43,10 @@ class BadgeRepository {
 
     // Check for new badges that the user can earn based on their completed goals
     func checkForNewBadges(userId: UUID, completedGoalsCount: Int) async throws -> [Badge] {
-        try await dbQueue.read { db in
+        isLoading = true
+        defer { isLoading = false }
+        
+        return try await dbQueue.read { db in
             let earnedBadgeIds = try UserBadge
                 .filter(Column("userId") == userId)
                 .fetchAll(db)
@@ -53,7 +70,10 @@ class BadgeRepository {
 
     // Get recently earned badges for a user
     func getRecentlyEarnedBadges(userId: UUID, limit: Int = 3) async throws -> [Badge] {
-        try await dbQueue.read { db in
+        isLoading = true
+        defer { isLoading = false }
+        
+        return try await dbQueue.read { db in
             let earned = try UserBadge
                 .filter(Column("userId") == userId)
                 .order(Column("dateEarned").desc)
@@ -82,6 +102,7 @@ class BadgeRepository {
             userBadges.forEach { print("- \($0.badgeId) earned on \($0.dateEarned)") }
         }
     }
+
     func initializeBadges() async throws {
         try await dbQueue.write { db in
             // Only insert if the table is empty
