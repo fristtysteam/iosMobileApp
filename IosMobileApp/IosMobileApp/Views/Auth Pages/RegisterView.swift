@@ -8,12 +8,6 @@ struct RegisterView: View {
 
     var body: some View {
         VStack {
-            Image("logo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 100, height: 100)
-                .padding(.top, 40)
-
             if authController.registrationSuccess {
                 // Success state view
                 VStack(spacing: 20) {
@@ -49,30 +43,32 @@ struct RegisterView: View {
             } else {
                 // Registration form
                 TextField("Username", text: $authController.username)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .overlay(
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+                    .padding(8)
+                    .background(
                         RoundedRectangle(cornerRadius: 5)
-                            .stroke(authController.isUsernameValid ? Color.clear : Color.red, lineWidth: 1)
+                            .stroke(authController.isUsernameValid ? Color.gray.opacity(0.3) : Color.red, lineWidth: 1)
                     )
+                    .padding(.horizontal)
                 
                 TextField("Email", text: $authController.email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(authController.isEmailValid ? Color.clear : Color.red, lineWidth: 1)
-                    )
-                    .autocapitalization(.none)
+                    .textInputAutocapitalization(.never)
                     .keyboardType(.emailAddress)
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(authController.isEmailValid ? Color.gray.opacity(0.3) : Color.red, lineWidth: 1)
+                    )
+                    .padding(.horizontal)
                 
                 SecureField("Password", text: $authController.password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .overlay(
+                    .padding(8)
+                    .background(
                         RoundedRectangle(cornerRadius: 5)
-                            .stroke(authController.isPasswordValid ? Color.clear : Color.red, lineWidth: 1)
+                            .stroke(authController.isPasswordValid ? Color.gray.opacity(0.3) : Color.red, lineWidth: 1)
                     )
+                    .padding(.horizontal)
                 
                 Button(action: {
                     Task {
@@ -95,16 +91,16 @@ struct RegisterView: View {
                 .padding()
                 .disabled(authController.isLoading)
 
-                Button(action: switchView) {
-                    Text("Login")
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                HStack {
+                    Text("Already have an account? ")
+                        .foregroundColor(.gray)
+                    Button(action: switchView) {
+                        Text("Login")
+                            .fontWeight(.medium)
+                            .foregroundColor(.green)
+                    }
                 }
-                .padding()
+                .padding(.top, 8)
             }
         }
         .onAppear {

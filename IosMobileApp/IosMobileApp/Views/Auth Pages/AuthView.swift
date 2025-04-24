@@ -27,11 +27,16 @@ struct AuthView: View {
             BlobBackground()
             
             VStack {
-                Image("logo")
+                Image("AchievrLogo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 100, height: 100)
                     .padding(.top, 40)
+                
+                Text("Achievr")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding(.bottom, 20)
 
                 if isLogin {
                     // Login Form
@@ -61,23 +66,25 @@ struct AuthView: View {
     
     private var loginForm: some View {
         VStack {
-            TextField("Username", text: $authController.username)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled(true)
-                .padding()
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(authController.isUsernameValid ? Color.clear : Color.red, lineWidth: 1)
-                )
+            VStack(spacing: 16) {
+                TextField("Username", text: $authController.username)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(authController.isUsernameValid ? Color.gray.opacity(0.3) : Color.red, lineWidth: 1)
+                    )
+                    .padding(.horizontal)
             
-            SecureField("Password", text: $authController.password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(authController.isPasswordValid ? Color.clear : Color.red, lineWidth: 1)
-                )
+                SecureField("Password", text: $authController.password)
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(authController.isPasswordValid ? Color.gray.opacity(0.3) : Color.red, lineWidth: 1)
+                    )
+                    .padding(.horizontal)
+            }
         
             Button(action: {
                 Task {
@@ -164,19 +171,59 @@ struct AuthView: View {
 }
 
 struct BlobBackground: View {
+    @State private var isAnimating = false
+    
     var body: some View {
         ZStack {
-            Color.blue.opacity(0.2)
-                .blur(radius: 10)
-                .frame(width: 300, height: 250)
-                .clipShape(Circle())
-                .offset(x: -150, y: -350)
-            
-            Color.green.opacity(0.2)
-                .blur(radius: 10)
-                .frame(width: 250, height: 250)
-                .clipShape(Circle())
-                .offset(x: 150, y: 350)
+            // Shared gradient background
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.blue.opacity(0.4),
+                    Color.purple.opacity(0.8)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .frame(width: UIScreen.main.bounds.width * 2, height: UIScreen.main.bounds.height * 2)
+            .offset(y: -100)
+            .blur(radius: 30)
+            .mask {
+                ZStack {
+                    // Top left mask
+                    UnevenRoundedRectangle(
+                        cornerRadii: .init(
+                            topLeading: 150,
+                            bottomLeading: 150,
+                            bottomTrailing: 0,
+                            topTrailing: 160
+                        )
+                    )
+                    .frame(width: 250, height: 250)
+                    .rotationEffect(.degrees(64))
+                    .offset(x: -150, y: -380)
+                    .opacity(isAnimating ? 1 : 0)
+                    
+                    // Bottom right mask
+                    UnevenRoundedRectangle(
+                        cornerRadii: .init(
+                            topLeading: 150,
+                            bottomLeading: 150,
+                            bottomTrailing: 0,
+                            topTrailing: 150
+                        )
+                    )
+                    .frame(width: 250, height: 250)
+                    .rotationEffect(.degrees(240))
+                    .offset(x: 150, y: 400)
+                    .opacity(isAnimating ? 1 : 0)
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            withAnimation(.easeIn(duration: 2.0)) {
+                isAnimating = true
+            }
         }
     }
 }
