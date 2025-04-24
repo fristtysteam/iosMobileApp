@@ -30,25 +30,21 @@ class BadgeController: ObservableObject {
             userBadges = fetchedUserBadges
             allBadges = fetchedAllBadges
         } catch {
-            print("Error loading badges: \(error)")
+            // Error handled silently
         }
     }
     
     func checkAndAwardBadges(for userId: UUID) async {
         do {
             let completedCount = try await userRepository.getCompletedGoalsCount(userId: userId)
-            print("📊 User \(userId) has completed \(completedCount) goals")
-            
             let newBadges = try await badgeRepository.checkForNewBadges(userId: userId, completedGoalsCount: completedCount)
-            print("🔍 Found \(newBadges.count) new badges eligible for user")
             
             for badge in newBadges {
                 do {
                     try await badgeRepository.awardBadge(userId: userId, badgeId: badge.id)
-                    print("🏆 Awarded badge '\(badge.name)' to user \(userId)")
                     await showBadgeEarnedCelebration(badge: badge)
                 } catch {
-                    print("❌ Error awarding badge '\(badge.name)': \(error)")
+                    // Error handled silently
                 }
             }
             
@@ -56,7 +52,7 @@ class BadgeController: ObservableObject {
                 await loadBadges(for: userId)
             }
         } catch {
-            print("❌ Error checking and awarding badges: \(error)")
+            // Error handled silently
         }
     }
     

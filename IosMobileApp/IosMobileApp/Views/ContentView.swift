@@ -26,7 +26,7 @@ struct ContentView: View {
                 .ignoresSafeArea(edges: .bottom)
             }
             
-            // Badge Alert Overlay
+            // Modal overlay for badge achievements
             if badgeController.showBadgeAlert, let badge = badgeController.newlyEarnedBadge {
                 Color.black.opacity(0.3)
                     .ignoresSafeArea()

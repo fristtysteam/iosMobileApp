@@ -152,46 +152,33 @@ struct EditProfileView: View {
             ImagePicker(selectedImage: $profileImage, isPresented: $showImagePicker)
                 .onDisappear {
                     if let newImage = profileImage {
-                        print("📸 Image selected: \(newImage.size)")
                         hasChangedImage = true
                         
-                        // Try to update the profile picture immediately
                         Task {
                             do {
                                 let imageData = newImage.jpegData(compressionQuality: 0.7)
-                                print("📸 Image data size: \(imageData?.count ?? 0) bytes")
                                 try await userController.updateProfilePicture(profilePictureData: imageData)
-                                print("📸 Profile picture updated successfully")
                             } catch {
-                                print("❌ Failed to update profile picture: \(error)")
                                 toastMessage = "Failed to update profile picture"
                                 toastType = .error
                                 showToast = true
                             }
                         }
-                    } else {
-                        print("❌ No image selected")
                     }
                 }
         }
     }
     
     private func checkPhotoLibraryPermission() {
-        print("🔍 Checking photo library permission")
-        
         let currentStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-        print("📱 Current photo library status: \(currentStatus.rawValue)")
         
         switch currentStatus {
         case .notDetermined:
-            // First time request - this will show the permission dialog
             PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
                 DispatchQueue.main.async {
                     if status == .authorized || status == .limited {
-                        print("✅ Photo library access granted, showing picker")
                         self.showImagePicker = true
                     } else {
-                        print("❌ Photo library access denied")
                         self.toastMessage = "Please allow access to your photos to set a profile picture"
                         self.toastType = .error
                         self.showToast = true
@@ -199,15 +186,12 @@ struct EditProfileView: View {
                 }
             }
         case .authorized, .limited:
-            print("✅ Already have photo library access, showing picker")
             self.showImagePicker = true
         case .denied, .restricted:
-            print("❌ Photo library access denied or restricted")
             self.toastMessage = "Please allow access to your photos in Settings to set a profile picture"
             self.toastType = .error
             self.showToast = true
         @unknown default:
-            print("❌ Unknown photo library access status")
             break
         }
     }
@@ -215,7 +199,6 @@ struct EditProfileView: View {
     private func updateProfile() {
         isLoading = true
         
-        // Convert image to data if it exists and has changed
         var profileImageData: Data? = nil
         if hasChangedImage, let image = profileImage {
             profileImageData = image.jpegData(compressionQuality: 0.7)
@@ -223,9 +206,7 @@ struct EditProfileView: View {
         
         Task {
             do {
-                // If password fields are empty, use the simple profile update
                 if currentPassword.isEmpty {
-                    // Input validation for basic profile update
                     guard !newUsername.isEmpty else {
                         showError("Username cannot be empty")
                         isLoading = false
@@ -244,14 +225,12 @@ struct EditProfileView: View {
                         return
                     }
                     
-                    // Basic profile info update without password
                     try await userController.updateProfileInfo(
                         newUsername: newUsername,
                         newEmail: newEmail,
                         profilePictureData: hasChangedImage ? profileImageData : nil
                     )
                 } else {
-                    // Password is provided, validate and use the full profile update
                     guard isValidEmail(newEmail) else {
                         showError("Please enter a valid email address")
                         isLoading = false
@@ -272,7 +251,6 @@ struct EditProfileView: View {
                         }
                     }
                     
-                    // Full profile update with password
                     try await userController.updateProfile(
                         newUsername: newUsername,
                         newEmail: newEmail,
@@ -286,7 +264,6 @@ struct EditProfileView: View {
                 toastType = .success
                 showToast = true
                 
-                // Dismiss the view after a short delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     presentationMode.wrappedValue.dismiss()
                 }

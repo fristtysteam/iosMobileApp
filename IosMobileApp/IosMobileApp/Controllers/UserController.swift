@@ -10,7 +10,6 @@ class UserController: ObservableObject {
     @Published var errorMessage: String?
     @Published var showError: Bool = false
     @Published var registrationSuccess: Bool = false
-    @Published var users: [User] = []
     @Published var isAuthenticated = false
     @Published var isUsernameValid: Bool = true
     @Published var isPasswordValid: Bool = true
@@ -41,15 +40,10 @@ class UserController: ObservableObject {
                     password: password
                 )
                 
-                // Clear form fields
                 username = ""
                 email = ""
                 password = ""
-                
-                // Set success state
                 registrationSuccess = true
-                
-                // Set current user
                 setCurrentUser(username: user.username, email: user.email, id: user.id)
                 
             } catch let error as AuthError {
@@ -63,12 +57,10 @@ class UserController: ObservableObject {
     }
     
     private func validateInputs() -> Bool {
-        // Reset validation states
         isUsernameValid = true
         isEmailValid = true
         isPasswordValid = true
         
-        // Validate username
         if username.isEmpty {
             isUsernameValid = false
             errorMessage = "Username cannot be empty"
@@ -76,7 +68,6 @@ class UserController: ObservableObject {
             return false
         }
         
-        // Validate email
         if !isValidEmail(email) {
             isEmailValid = false
             errorMessage = "Please enter a valid email address"
@@ -84,7 +75,6 @@ class UserController: ObservableObject {
             return false
         }
         
-        // Validate password
         if password.count < 6 {
             isPasswordValid = false
             errorMessage = "Password must be at least 6 characters"
@@ -101,10 +91,6 @@ class UserController: ObservableObject {
         return emailPred.evaluate(with: email)
     }
     
-    private func loadUsers() async {
-        // ... existing code ...
-    }
-    
     func setCurrentUser(username: String, email: String, id: UUID) {
         currentUser = User(id: id, username: username, email: email, password: "")
     }
@@ -115,12 +101,10 @@ class UserController: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // Use the authController's currentUser instead of our own
             guard let currentUser = authController.currentUser else {
                 throw AuthError.noUserLoggedIn
             }
             
-            // Update user information
             let updatedUser = try await userRepository.updateUser(
                 userID: currentUser.id,
                 newUsername: newUsername,
@@ -130,7 +114,6 @@ class UserController: ObservableObject {
                 profilePictureData: profilePictureData
             )
             
-            // Update current user information in both controllers
             self.currentUser = updatedUser
             authController.updateCurrentUser(updatedUser)
             
@@ -145,25 +128,21 @@ class UserController: ObservableObject {
         }
     }
     
-    // Add a dedicated method for updating just the profile picture
     func updateProfilePicture(profilePictureData: Data?) async throws {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         
         do {
-            // Use the authController's currentUser instead of our own
             guard let currentUser = authController.currentUser else {
                 throw AuthError.noUserLoggedIn
             }
             
-            // Update just the profile picture
             let updatedUser = try await userRepository.updateProfilePicture(
                 userID: currentUser.id,
                 profilePictureData: profilePictureData
             )
             
-            // Update both controllers' currentUser
             self.currentUser = updatedUser
             authController.updateCurrentUser(updatedUser)
             
@@ -174,7 +153,6 @@ class UserController: ObservableObject {
         }
     }
     
-    // Add method to update profile info (username, email, picture) without password
     func updateProfileInfo(
         newUsername: String,
         newEmail: String,
@@ -185,12 +163,10 @@ class UserController: ObservableObject {
         defer { isLoading = false }
         
         do {
-            // Use the authController's currentUser
             guard let currentUser = authController.currentUser else {
                 throw AuthError.noUserLoggedIn
             }
             
-            // Update user information without password verification
             let updatedUser = try await userRepository.updateProfileInfo(
                 userID: currentUser.id,
                 newUsername: newUsername,
@@ -198,7 +174,6 @@ class UserController: ObservableObject {
                 profilePictureData: profilePictureData
             )
             
-            // Update current user information in both controllers
             self.currentUser = updatedUser
             authController.updateCurrentUser(updatedUser)
             

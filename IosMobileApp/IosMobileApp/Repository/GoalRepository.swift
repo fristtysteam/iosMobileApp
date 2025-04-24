@@ -29,7 +29,7 @@ class GoalRepository: ObservableObject {
         }
     }
 
-    // Delete a goal
+
     func deleteGoal(_ goal: Goal) throws {
         try dbQueue.write { db in
             try goal.delete(db)

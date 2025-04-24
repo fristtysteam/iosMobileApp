@@ -32,7 +32,7 @@ final class DatabaseManager {
             try createTables()
             try seedInitialData()
         } catch {
-            print("Database error: \(error)")
+            // Database initialization error handled silently
         }
     }
 
@@ -114,7 +114,6 @@ final class DatabaseManager {
                 for badge in defaultBadges {
                     try badge.insert(db)
                 }
-                print("✅ Seeded \(defaultBadges.count) badges")
             }
 
 
@@ -130,7 +129,6 @@ final class DatabaseManager {
         // Insert test user
         try dbQueue?.write { db in
             try testUser.insert(db)
-            print("✅ Created test user: \(testUser.username)")
             
             // Create sample goals for the test user
             let sampleGoals = [
@@ -173,7 +171,6 @@ final class DatabaseManager {
             for goal in sampleGoals {
                 try goal.insert(db)
             }
-            print("✅ Created \(sampleGoals.count) sample goals for test user")
         }
 
         // Seed with some sample quotes
@@ -188,11 +185,7 @@ final class DatabaseManager {
             for quote in sampleQuotes {
                 try quote.insert(db)
             }
-            print("✅ Seeded \(sampleQuotes.count) quotes")
         }
-        
-        
-        
     }
 
     // Returns the shared database queue instance

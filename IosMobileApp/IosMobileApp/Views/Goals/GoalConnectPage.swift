@@ -62,12 +62,10 @@ struct GoalConnectPage: View {
                                 Text("Goal Timeline")
                                     .font(.headline)
                                 Spacer()
-                                if goalController.goals.count > 5 {
-                                    Button(action: { showingGoalsList = true }) {
-                                        Text("View All")
-                                            .font(.subheadline)
-                                            .foregroundColor(.blue)
-                                    }
+                                Button(action: { showingGoalsList = true }) {
+                                    Text("View All")
+                                        .font(.subheadline)
+                                        .foregroundColor(.blue)
                                 }
                             }
                             .padding(.horizontal, 24)
