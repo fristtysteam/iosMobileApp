@@ -58,12 +58,22 @@ struct GoalConnectPage: View {
                     // Timeline Section
                     if !goalController.goals.isEmpty {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Goal Timeline")
-                                .font(.headline)
-                                .padding(.horizontal, 24)
+                            HStack {
+                                Text("Goal Timeline")
+                                    .font(.headline)
+                                Spacer()
+                                if goalController.goals.count > 5 {
+                                    Button(action: { showingGoalsList = true }) {
+                                        Text("View All")
+                                            .font(.subheadline)
+                                            .foregroundColor(.blue)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 24)
                             
                             VStack(spacing: 0) {
-                                ForEach(goalController.goals.prefix(5)) { goal in
+                                ForEach(goalController.goals) { goal in
                                     TimelineItemView(goal: goal) {
                                         selectedGoalID = goal.id
                                         showingGoalDetails = true
@@ -77,6 +87,12 @@ struct GoalConnectPage: View {
                 }
                 .padding(.bottom, 80)
             }
+        }
+        .task {
+            await goalController.loadGoals()
+        }
+        .refreshable {
+            await goalController.loadGoals()
         }
         .navigationDestination(isPresented: $showingAddGoal) {
             AddGoalView(onGoalAdded: { newGoalID in

@@ -48,7 +48,7 @@ class BadgeRepository: ObservableObject {
         
         return try await dbQueue.read { db in
             let earnedBadgeIds = try UserBadge
-                .filter(Column("userId") == userId)
+                .filter(Column("userId") == userId.uuidString)  // Convert UUID to String
                 .fetchAll(db)
                 .map { $0.badgeId }
 
@@ -75,7 +75,7 @@ class BadgeRepository: ObservableObject {
         
         return try await dbQueue.read { db in
             let earned = try UserBadge
-                .filter(Column("userId") == userId)
+                .filter(Column("userId") == userId.uuidString)  // Convert UUID to string
                 .order(Column("dateEarned").desc)
                 .limit(limit)
                 .fetchAll(db)
@@ -112,6 +112,26 @@ class BadgeRepository: ObservableObject {
                 }
                 print("Initialized \(Badge.allBadges.count) badges in database")
             }
+        }
+    }
+
+    // Get user badges with earned dates
+    func getUserBadges(userId: UUID) async throws -> [UserBadge] {
+        return try await dbQueue.read { db in
+            try UserBadge
+                .filter(Column("userId") == userId.uuidString)
+                .order(Column("dateEarned").desc)
+                .fetchAll(db)
+        }
+    }
+
+    // Get completed goals count for a user
+    func getCompletedGoalsCount(userId: UUID) async throws -> Int {
+        return try await dbQueue.read { db in
+            try Goal
+                .filter(Column("userId") == userId.uuidString)
+                .filter(Column("isCompleted") == true)
+                .fetchCount(db)
         }
     }
 }

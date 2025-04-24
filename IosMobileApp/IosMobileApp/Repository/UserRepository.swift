@@ -228,7 +228,7 @@ class UserRepository: ObservableObject {
             let badges = try Badge
                 .filter(sql: """
                     id IN (
-                        SELECT badgeId FROM userbadge WHERE userId = ?
+                        SELECT badgeId FROM user_badge WHERE userId = ?
                     )
                 """, arguments: [userId.uuidString])
                 .fetchAll(db)

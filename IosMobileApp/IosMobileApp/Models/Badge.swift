@@ -24,11 +24,11 @@ struct Badge: Identifiable, Codable, FetchableRecord, PersistableRecord {
     }
     
     static let allBadges: [Badge] = [
-        Badge(id: "beginner", name: "Beginner", description: "Completed 1 goal", imageName: "badge.beginner", goalCountRequired: 1),
-        Badge(id: "achiever", name: "Achiever", description: "Completed 5 goals", imageName: "badge.achiever", goalCountRequired: 5),
-        Badge(id: "expert", name: "Expert", description: "Completed 10 goals", imageName: "badge.expert", goalCountRequired: 10),
-        Badge(id: "master", name: "Master", description: "Completed 25 goals", imageName: "badge.master", goalCountRequired: 25),
-        Badge(id: "legend", name: "Legend", description: "Completed 50 goals", imageName: "badge.legend", goalCountRequired: 50)
+        Badge(id: "beginner", name: "Beginner", description: "Completed 1 goal", imageName: "beginner", goalCountRequired: 1),
+        Badge(id: "achiever", name: "Achiever", description: "Completed 5 goals", imageName: "achiever", goalCountRequired: 5),
+        Badge(id: "expert", name: "Expert", description: "Completed 10 goals", imageName: "EXPERT", goalCountRequired: 10),
+        Badge(id: "master", name: "Master", description: "Completed 25 goals", imageName: "master", goalCountRequired: 25),
+        Badge(id: "legend", name: "Legend", description: "Completed 50 goals", imageName: "legend", goalCountRequired: 50)
     ]
 }
 
@@ -38,11 +38,12 @@ struct UserBadge: Identifiable, Codable, FetchableRecord, PersistableRecord {
     let badgeId: String
     let dateEarned: Date
     
+    static let databaseTableName = "user_badge"
+    
     enum Columns {
         static let userId = Column(CodingKeys.userId)
         static let badgeId = Column(CodingKeys.badgeId)
         static let dateEarned = Column(CodingKeys.dateEarned)
-        
     }
     
     init(userId: UUID, badgeId: String, dateEarned: Date = Date()) {
@@ -51,4 +52,15 @@ struct UserBadge: Identifiable, Codable, FetchableRecord, PersistableRecord {
         self.dateEarned = dateEarned
     }
     
+    func encode(to container: inout PersistenceContainer) {
+        container["userId"] = userId.uuidString
+        container["badgeId"] = badgeId
+        container["dateEarned"] = dateEarned
+    }
+    
+    init(row: Row) throws {
+        userId = UUID(uuidString: row["userId"])!
+        badgeId = row["badgeId"]
+        dateEarned = row["dateEarned"]
+    }
 }

@@ -45,6 +45,9 @@ struct User: Identifiable, Codable, FetchableRecord, PersistableRecord {
 }
 extension User {
     func hasBadge(_ badgeId: String) -> Bool {
+        // This should be implemented by querying the user_badge table
+        // but since this is a model, we'll need to handle this at the repository level
+        // The actual check is done in BadgeRepository.getBadgesForUser
         return false
     }
 }
