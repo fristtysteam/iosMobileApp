@@ -1,37 +1,50 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var goals: [Goal] = [
-        Goal(id: UUID(), title: "Learn SwiftUI", description: "Build a few UI components using SwiftUI", category: "Programming", deadline: Date().addingTimeInterval(60*60*24*7), progress: 40.0, isCompleted: false, progressDiary: ["Started learning", "Completed 2 tutorials"]),
-        Goal(id: UUID(), title: "Finish reading book", description: "Finish reading 'The Swift Programming Language' book", category: "Reading", deadline: Date().addingTimeInterval(60*60*24*14), progress: 20.0, isCompleted: false, progressDiary: ["Read the first chapter", "Started chapter 2"]),
-        Goal(id: UUID(), title: "Create a Personal Portfolio", description: "Build an online portfolio to showcase projects", category: "Design", deadline: Date().addingTimeInterval(60*60*24*30), progress: 10.0, isCompleted: false, progressDiary: ["Set up a GitHub repository", "Created initial HTML structure"]),
-    ]
-    
+    @State private var currentTab = 0
+    @EnvironmentObject var goalController: GoalController
+    @EnvironmentObject var authController: AuthController
+    @EnvironmentObject var badgeController: BadgeController
+
     var body: some View {
-        VStack {
-            HeaderView(title: "Achievr")
-            
-            CustomPagingSlider(data: $goals) { goal in
-                VStack {
-                    Text(goal.wrappedValue.title)
-                        .font(.headline)
-                    
-                    Text(goal.wrappedValue.description ?? "No description")  // Use a default value in case description is nil
-                        .font(.subheadline)
-                        .lineLimit(2)
-                        .foregroundColor(.gray)
+        ZStack {
+            NavigationStack {
+                ZStack(alignment: .bottom) {
+                    switch currentTab {
+                    case 0:
+                        HomeView(goals: $goalController.goals)
+                    case 1:
+                        GoalConnectPage()
+                    case 2:
+                        ProfileView()
+                    default:
+                        HomeView(goals: $goalController.goals)
+                    }
+
+                    BottomBarView(currentTab: $currentTab)
                 }
-                .padding()
+                .ignoresSafeArea(edges: .bottom)
             }
             
+            // Modal overlay for badge achievements
+            if badgeController.showBadgeAlert, let badge = badgeController.newlyEarnedBadge {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .overlay {
+                        BadgeAlertView(badge: badge) {
+                            badgeController.dismissBadgeAlert()
+                        }
+                    }
+                    .transition(.opacity)
+            }
         }
-        .padding()
-        
-        
-        BottomBar(addButtonAction: {});
+        .onAppear {
+            Task {
+                await goalController.loadGoals()
+                if let userId = authController.currentUser?.id {
+                    await badgeController.loadBadges(for: userId)
+                }
+            }
+        }
     }
-}
-
-#Preview {
-    ContentView()
 }

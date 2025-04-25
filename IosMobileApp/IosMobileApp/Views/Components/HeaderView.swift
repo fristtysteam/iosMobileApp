@@ -1,65 +1,47 @@
-//
-//  HeaderView.swift
-//  IosMobileApp
-//
-//  Created by Student on 14/03/2025.
-//
-
-import SwiftUI
-
 import SwiftUI
 
 struct HeaderView: View {
     let title: String
+    let useGradient: Bool
     
-    @State private var isProfileTapped = false
-    
+    init(title: String, useGradient: Bool = false) {
+        self.title = title
+        self.useGradient = useGradient
+    }
+
     var body: some View {
-        VStack {
-            HStack {
-                
-                Circle()
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(Color.blue)
-                    .overlay(
-                        Image(systemName: "person.fill")
-                            .foregroundColor(.white)
-                            .font(.title)
-                    )
-                    .onTapGesture {
-                        isProfileTapped.toggle()
-                        print("Profile tapped: \(isProfileTapped ? "Yes" : "No")")
-                    }
-                
-                Spacer()
-                
-                
-                Text(self.title)
+        HStack {
+            // Title with optional gradient
+            if useGradient {
+                Text(title)
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundColor(Color.blue)
-                
-                Spacer()
-                
-            
-                Image(systemName: "bell.fill")
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.blue, .purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+            } else {
+                Text(title)
                     .font(.title)
-                    .foregroundColor(Color.blue)
-                    .onTapGesture {
-                        print("Notification tapped!")
-                    }
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
             }
-            .padding()
-            .shadow(radius: 10)
-            .frame(maxWidth: .infinity, alignment: .top)
+
+            Spacer()
+
+          
         }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-
-
-
-
 #Preview {
-    HeaderView(title: "goal getter")
+    VStack(spacing: 20) {
+        HeaderView(title: "Achievr")
+        HeaderView(title: "Goal Connect", useGradient: true)
+    }
 }

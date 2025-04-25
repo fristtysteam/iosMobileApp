@@ -1,54 +1,76 @@
 import SwiftUI
 
-struct BottomBar: View {
-    var addButtonAction: () -> Void
+struct BottomBarView: View {
+    @Binding var currentTab: Int
+    @EnvironmentObject var authController: AuthController
+    @State private var showLogoutAlert = false
     
     var body: some View {
-        HStack {
-            Button(action: { /* Home Action */ }) {
-                Image(systemName: "house.fill")
-                    .resizable()
-                    .frame(width: 28, height: 28)
-                    .foregroundColor(.primary)
-            }
-            .padding()
-
-            Spacer()
-
-            Button(action: addButtonAction) {
-                Image(systemName: "plus")
-                    .font(.headline)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 20)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(100)
-                    .shadow(radius: 3)
-            }
-
-            Spacer()
-
-            Menu {
-                Button("Settings", action: {})
-                Button("Logout", action: {})
-            } label: {
-                Image(systemName: "ellipsis")
-                    .resizable()
-                    .frame(width: 28, height: 6)
-                    .foregroundColor(.primary)
-                    .padding()
-            }
+        HStack(alignment: .center, spacing: 0) {
+            BottomBarItem(
+                icon: "house.fill",
+                label: "Home",
+                tabIndex: 0,
+                currentTab: currentTab,
+                action: { currentTab = 0 }
+            )
+            
+            BottomBarItem(
+                icon: "target",
+                label: "Goals",
+                tabIndex: 1,
+                currentTab: currentTab,
+                action: { currentTab = 1 }
+            )
+            
+            BottomBarItem(
+                icon: "person.crop.circle",
+                label: "Profile",
+                tabIndex: 2,
+                currentTab: currentTab,
+                action: { currentTab = 2 }
+            )
         }
-        .padding(.vertical)
         .frame(height: 70)
-        .background(Color(.white))
-        //.cornerRadius(15)
-        .shadow(radius: 5)
-        //.padding, 16)
+        .background(Color(.systemBackground).ignoresSafeArea(edges: .bottom))
     }
-
 }
 
-#Preview {
-    BottomBar(addButtonAction: {})
+struct BottomBarItem: View {
+    let icon: String
+    let label: String
+    let tabIndex: Int
+    let currentTab: Int
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                Text(label)
+                    .font(.caption)
+            }
+            .frame(maxHeight: .infinity)
+            .frame(maxWidth: .infinity)
+            .foregroundColor(tabIndex == currentTab ? .gray : .primary)
+        }
+    }
+}
+
+struct BottomBarView_Previews: PreviewProvider {
+    static var previews: some View {
+        PreviewWrapper()
+    }
+    
+    struct PreviewWrapper: View {
+        @State private var currentTab = 0
+        
+        var body: some View {
+            VStack {
+                Spacer()
+                BottomBarView(currentTab: $currentTab)
+            }
+        }
+    }
 }

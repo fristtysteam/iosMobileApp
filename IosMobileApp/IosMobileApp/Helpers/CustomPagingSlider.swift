@@ -3,8 +3,6 @@ import SwiftUI
 import SwiftUICore
  
 
-
-
 struct CustomPagingSlider<Title: View, GoalCollection: RandomAccessCollection>: View where GoalCollection: MutableCollection, GoalCollection.Element: Identifiable {
     
     var showsIndicator: ScrollIndicatorVisibility = .hidden
@@ -14,6 +12,7 @@ struct CustomPagingSlider<Title: View, GoalCollection: RandomAccessCollection>: 
     
     @Binding var data: GoalCollection
     @ViewBuilder var title: (Binding<GoalCollection.Element>) -> Title
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(spacing: pagingControlSpacing) {
@@ -22,10 +21,7 @@ struct CustomPagingSlider<Title: View, GoalCollection: RandomAccessCollection>: 
                     ForEach($data) { item in
                         VStack(spacing: 0) {
                             title(item)
-                                .frame(width: 300, height: 200) // You can define the size of each item
-                                .background(Color.gray.opacity(0.2)) // Example styling
-                                .cornerRadius(8)
-                                .shadow(radius: 5)
+                                .frame(width: 350, height: 200)
                         }
                     }
                 }
